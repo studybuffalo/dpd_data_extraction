@@ -1,5 +1,5 @@
 # -*- coding: latin-1 -*-
-from MySQLdb import escape_string
+# from MySQLdb import escape_string
 
 def generate_statement(table):
 	output = "INSERT INTO `%s`" % table

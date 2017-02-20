@@ -1,110 +1,203 @@
 #!/usr/bin/env python3
-# -*- coding: latin-1 -*-
 
-'''Uploads the Health Canada Drug Product Database to a MySQL DB
+"""Uploads the Health Canada Drug Product Database to a MySQL DB
 
-  Last Update: 2017-Feb-20
+    Last Update: 2017-Feb-20
 
-  Copyright (c) Notices
-	2017	Joshua R. Torrance	<studybuffalo@studybuffalo.com>
+    Copyright (c) Notices
+	    2017	Joshua R. Torrance	<studybuffalo@studybuffalo.com>
 	
-  This software may be used in any medium or format and adapated to
-  any purpose under the following terms:
-    - You must give appropriate credit, provide a link to the
-      license, and indicate if changes were made. You may do so in
-      any reasonable manner, but not in any way that suggests the
-      licensor endorses you or your use.
-    - You may not use the material for commercial purposes.
-    - If you remix, transform, or build upon the material, you must 
-      distribute your contributions under the same license as the 
-      original.
-	
-  Alternative uses may be discussed on an individual, case-by-case 
-  basis by contacting one of the noted copyright holders.
+    This program is free software: you can redistribute it and/or 
+    modify it under the terms of the GNU General Public License as 
+    published by the Free Software Foundation, either version 3 of the 
+    License, or (at your option) any later version.
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-  HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-  WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-  OTHER DEALINGS IN THE SOFTWARE.
-'''
- 
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, 
+    see <http://www.gnu.org/licenses/>.
+
+    SHOULD YOU REQUIRE ANY EXCEPTIONS TO THIS LICENSE, PLEASE CONTACT 
+    THE COPYRIGHT HOLDERS.
+"""
+
+"""
+    STYLE RULES FOR THIS PROGRAM
+    Style follows the Python Style Guide (PEP 8) where possible. The 
+    following are common standards for reference
+    
+    COMMENT LINES to max of 72 characters
+    PROGRAM LINES to a max of 79 characters
+    
+    INDENTATION 4 spaces
+    STRINGS use quotation marks
+
+    VARIABLES use camelCase
+    GLOBAL VARIABLES use lowercase with underscores
+    CLASSES use CapWords
+    CONSTANTS use UPPERCASE
+    FUNCTIONS use lowercase with underscores
+    MODULES use lowercase with underscores
+    
+    ALIGNMENT
+        If possible, align with open delminter
+        If not possible, indent
+        If one indent would align arguments with code in block, use 
+            two indents to provide visual differentiation
+        Operators should occur at start of line in broken up lines, 
+        not at the end of the preceding line
+
+    OPERATORS & SPACING
+    Use spacing in equations
+        e.g. 1 + 1 = 2
+    Do not use spacing in assigning arguments in functions 
+        e.g. def foo(bar=1):
+"""
+
 import codecs
-import urllib2
+from urllib import robotparser, request
 import zipfile
+from unipath import Path
 import os
 import sys
 import datetime
-import MySQLdb
-from MySQLdb import escape_string
-import hashlib
+import pymysql
+import configparser
+
 from parse import parse
 import upload
 
 
 def file_len(fname):
-	'''Calculates the number of lines in a file.'''
+	"""Calculates the number of lines in a file."""
 	with open(fname) as f:
 		for i, l in enumerate(f):
 			pass
 	return i + 1
 
+def get_date():
+	"""Returns the current date in a YYYY-MM-DD format."""
+	today = datetime.date.today()
+	year = today.year
+	month = "%02d" % today.month
+	day = "%02d" % today.day
+	date = "%s-%s-%s" % (year, month, day)
 
-# Current file directory
-scriptDir = os.path.dirname(os.path.abspath(__file__))
+	return date
 
-# Generates today's date for saving and extracting files
-today = datetime.date.today()
-year = today.year
-month = "%02d" % today.month
-day = "%02d" % today.day
-date = "%s-%s-%s" % (year, month, day)
+def get_permission(robotFile):
+	"""Checks the specified robot.txt file for access permission."""
+	robot = robotparser.RobotFileParser()
+	robot.set_url(robotFile)
+	robot.read()
+
+	can_crawl = robot.can_fetch(
+		"Study Buffalo Data Extraction (http://www.studybuffalo.com/dataextraction/)",
+		"https://idbl.ab.bluecross.ca/idbl/load.do")
+
+	return can_crawl
+
+def progress_bar(title, curPos, start, stop):
+	"""Generates progress bar in console."""
+
+	# Normalize start, stop, curPos
+	curPos = (curPos - start) + 1
+	stop = (stop - start) + 1 
+	start = 1
+
+	# Determine current progress
+	prog = 100.00 * (curPos / stop)
+	
+	if prog != 100:
+		progComp = "#" * math.floor(prog / 2)
+		progRem = " " * (50 - math.floor(prog / 2))
+		prog = "%.2f%%" % prog
+		print(("%s [%s%s] %s  \r" % (title, progComp, progRem, prog)), end='')
+		sys.stdout.flush()
+	else:
+		progComp = "#" * 50
+		print("%s [%s] Complete!" % (title, progComp))
+
+def download_zips(suffixList, date):
+    # Root URL to access all the zip files
+    rootUrl = "http://www.hc-sc.gc.ca/dhp-mps/alt_formats/zip/prodpharma/databasdon/"
+
+    # User Agent details for the program
+    userAgent = ("Study Buffalo Data Extraction "
+                 "(http://www.studybuffalo.com/dataextraction/)")
+    email = "studybuffalo@studybuffalo.com"
+    scriptHeader = {'User-Agent': userAgent, 'From': email}
+
+    # Create the folder to hold the data extracts
+    zipsLocation = root.child("dpd_data_extracts", date)
+
+    if not zipsLocation.exists():
+        os.mkdir(zipsLocation.absolute())
+    
+    for suffix in suffixList:
+        # Set the file name for the downloads
+        if suffix == "":
+            zipName = "allfiles.zip"
+        else:
+            zipName = "allfiles_" + suffix + ".zip"
+        
+        # Access and download the 
+        print (("Downloading %s... " % zipName), end="")
+
+        # Creates zip path and name
+        dlName = zipsLocation.child(zipName)
+
+        # Create the zip url
+        url = rootUrl + zipName
+        
+        # Request to download file
+        req = request.Request(url, data=None, headers=scriptHeader)
+
+        # Request the file and open a file to write the contents
+        with request.urlopen(req) as response, open(dlName, 'wb') as file:
+            # Read the requested file from the website
+            zipFile = response.read()
+
+            # Save the file
+            file.write(zipFile)
+        
+        print ("Complete!")
+    
+    print ("\n")
+
+
+# SET UP PROCESSES TO RUN PROGRAM
+# Sets script directory to allow absolute path naming (for Cron job)
+# root = Path("/", "home", "joshua", "scripts", "dpd_data_extraction")
+root = Path("E:\\", "My Documents", "GitHub", "dpd_data_extraction")
+
+# Get the date
+today = get_date()
 
 # The various .txt files accessed from the HC DPD zip files
-fileList = ["comp", "drug", "form", "ingred", "package", "pharm", "route", "schedule", "status", "ther", "vet"]
+fileList = [
+    "comp", "drug", "form", "ingred", "package", "pharm", "route", 
+    "schedule", "status", "ther", "vet"
+]
 
 # The three types of .zip and .txt files found on the HC DPD
 suffixList = ["", "ia", "ap"]
 
-print("\nHealth Canada Drug Product Directorate Data Extraction Tool")
-print("Created by Joshua Torrance, 2015-11-19\n")
+print ("\nHEALTH CANADA DRUG PRODUCT DATABASE DATA EXTRACTION TOOL")
+print ("--------------------------------------------------------")
+print ("Created by Joshua Torrance, 2017-Feb-20\n\n")
 
 # Downloads zip files
-for suffix in suffixList:
-	zipName = 'allfiles.zip' if suffix == "" else 'allfiles_' + suffix + ".zip"
-	
-	print("Downloading %s" % zipName)
-	
-	url = "http://www.hc-sc.gc.ca/dhp-mps/alt_formats/zip/prodpharma/databasdon/" + zipName
-	scriptHeader = {
-		'User-Agent': 'Study Buffalo Data Extraction (http://www.studybuffalo.com/dataextraction/)',
-		'From': 'studybuffalo@studybuffalo.com'
-	}
-	
-	request = urllib2.Request(url, headers=scriptHeader)
-	zipFile = urllib2.urlopen(request)
-	downloadFile = zipFile.read()
-	
-	# Create file path (and folder if needed)
-	downloadLocation = os.path.join(scriptDir, "DPD_Data_Extract", date)
-	downloadLocation = os.path.normpath(downloadLocation)
-	
-	if not os.path.exists(downloadLocation):
-		os.mkdir(downloadLocation)
-	
-	# Creates file name
-	downloadName = os.path.join(downloadLocation, zipName)
-	downloadName = os.path.normpath(downloadName)
-	
-	# Saves file
-	with open(downloadName, "wb") as file:
-		file.write(downloadFile)
-		
-print("\n")
+print ("DOWNLOADING DATA EXTRACTIONS ZIP FILES")
+print ("--------------------------------------")
+download_zips(suffixList, today)
 
+
+"""
 #Extract and parse zip files
 for suffix in suffixList:
 	zipName = 'allfiles.zip' if suffix == "" else 'allfiles_' + suffix + ".zip"
@@ -260,5 +353,6 @@ for tableName in tableList:
 		'''
 print("Closing connection to database\n")
 conn.close()
+"""
 
-print("Extraction and Upload Complete!\n")
+print ("Health Canada Drug Product Database Extraction Tool Finished!\n")

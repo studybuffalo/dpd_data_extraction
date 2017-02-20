@@ -1,4 +1,4 @@
-# dpd_data_extraction
+# Health Canada Drup Product Database Data Extracton Tool
 This program downloads the Health Canada Drug Product Database data extracts and uploads them to a mysql database.
 
 ## Technical Details

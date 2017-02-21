@@ -66,6 +66,7 @@ import os
 import sys
 import datetime
 import math
+import csv
 import pymysql
 import configparser
 
@@ -154,12 +155,12 @@ def create_extract_folders():
 
     print ("Complete!\n")
 
-    return {"eLoc": extractLoc, "pLoc": parseLoc}
+    return {"root": root, "eLoc": extractLoc, "pLoc": parseLoc}
 
 def get_file_names(locs):
     """"Returns a list of all the file and folder details for the app"""
     print ("Generating file details... ", end="")
-
+    
     names = [
         {
             "name": "allfiles.zip",
@@ -196,8 +197,8 @@ def get_file_names(locs):
          {
             "name": "allfiles_ia.zip",
             "files": [
-               FileDetails("comp", "ia", locs),
-               FileDetails("drug", "ia", locs),
+                FileDetails("comp", "ia", locs),
+                FileDetails("drug", "ia", locs),
                 FileDetails("form", "ia", locs),
                 FileDetails("ingred", "ia", locs),
                 FileDetails("package", "ia", locs),
@@ -207,6 +208,16 @@ def get_file_names(locs):
                 FileDetails("status", "ia", locs),
                 FileDetails("ther", "ia", locs),
                 FileDetails("vet", "ia", locs)
+            ]
+         }
+    ]
+
+    names = [
+        {
+            "name": "allfiles.zip",
+            "files": [
+                FileDetails("comp", "", locs),
+                FileDetails("drug", "", locs)
             ]
          }
     ]
@@ -294,6 +305,8 @@ def parse_files(names):
     # Cycles through each suffix
     for zip in names:
         for file in zip["files"]:
+            parseArray = []
+
             # File details
             title = file.title
             name = file.name
@@ -305,23 +318,36 @@ def parse_files(names):
             i = 1
             temp = [];
             
-            # Name for progress bar (26 chars to all progress bars)
-            pbTitle = "Extracting %s" % name
-            pbTitle = pbTitle.ljust(26)
+            # Name for progress bar (23 chars to all progress bars)
+            pbTitle = "Parsing %s" % name
+            pbTitle = pbTitle.ljust(23)
 
-            # Open extracted file and create parsed file
-            with open(ePath, "r") as ext, open(pPath, "w") as par:
-                # Read each line of extracted file
-                for line in ext:
-                    # Parse line and write to parse file
-                    pText = "%s\n" % parse_extract_entry(name, line)
+            # Open extracted file and parse it
+            with open(ePath, "r") as ext:
+                # Treats text file as csv and converts lines to list
+                csvFile = csv.reader(ext, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL)
 
-                    par.write(pText)
+                # Read each line of file & output array of parsed text
+                for line in csvFile:
+                    # Parse list
+                    parseArray.append(parse_extract_entry(name, line))
 
                     # Display progress bar and increment counter
                     progress_bar(pbTitle, i, 1, length)
                     i = i + 1
-        
+            
+            # Save parsed text to file
+            with open(pPath, 'w', newline="") as pFile:
+                # Create writer to convert list to text
+                csvWriter = csv.writer(pFile, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL)
+
+                # Writer all lines to file
+                print ("Saving parsed extracts to file... ", end="")
+                
+                csvWriter.writerows (parseArray)
+                
+                print ("Complete!\n")
+
         print ("")
     print ("")
 
@@ -329,35 +355,36 @@ def parse_files(names):
 
 def upload_data(loc, data):
     """Uploads parsed files to the database."""
+    #List of database tables
+    tableList = [
+        "comp", "drug", "form", "ingred", "package", "pharm", "route", 
+        "schedule", "status", "ther", "vet",
+    ]
+
     # Obtain database credentials
     cLoc = loc["root"].parent.child("config", "python_config.cfg").absolute()
     
-    # Connect to config file and collect MYSQL login information
+    
     config = configparser.ConfigParser()
     config.read(cLoc)
+
     db = config.get("mysql_db_dpd", "db")
     host = config.get("mysql_db_dpd", "host")
     user = config.get("mysql_user_dpd_ent", "user")
     pw = config.get("mysql_user_dpd_ent", "password")
 
-    #List of database tables
-    tableList = [
-        "comp", "comp_ap", "comp_ia", "drug", "drug_ap", "drug_ia", "form", 
-        "form_ap", "form_ia", "ingred", "ingred_ap", "ingred_ia", "package", 
-        "package_ap", "package_ia", "pharm", "pharm_ap", "pharm_ia", "route", 
-        "route_ap", "route_ia", "schedule", "schedule_ap", "schedule_ia", 
-        "status", "status_ap", "status_ia", "ther", "ther_ap", "ther_ia", 
-        "vet", "vet_ap", "vet_ia"
-    ]
+    # Connect to database
+    print ("Connecting to database... ", end="")
     
-    print("Establishing database connection")
-    conn = None
+    conn = pymysql.connect(host, user, pw, db)
     cursor = conn.cursor()
+
+    print ("Complete!")
     
-    #Cycles through and uploads each entry to the database
+    # Uploads data to each database
     for tableName in tableList:
-        print(("Uploading to '%s' table..." % tableName), end="")
-        
+        print (("Uploading to '%s' table... " % tableName), end="")
+        '''
         #Truncates table to prepare for new entries
         try:
             cursor.execute("TRUNCATE %s" % tableName)
@@ -392,9 +419,10 @@ def upload_data(loc, data):
                 pass
 
         # PROGRESS BAR SOMEWHERE IN HERE?
-
-        print("Closing connection to database\n")
-        conn.close()
+        '''
+        print ("Complete!")
+    # Close connection to database
+    conn.close()
     
 
 
@@ -404,6 +432,9 @@ print ("Created by Joshua Torrance, 2017-Feb-20\n\n")
 
 print ("CREATE APPLICATION FOLDERS AND FILE DETAILS")
 print ("----------------------------------------------")
+
+# Get permission to access the Health Canada website
+
 # Create the extract folders and save the paths
 locs = create_extract_folders()
 
@@ -414,7 +445,7 @@ names = get_file_names(locs)
 print ("DOWNLOADING DATA EXTRACTIONS ZIP FILES")
 print ("--------------------------------------")
 
-download_zips(locs, names)
+# download_zips(locs, names)
 
 
 # Extract the data extracts from the zip files
@@ -434,7 +465,6 @@ parsedData = parse_files(names)
 print ("UPLOADING PARSED DATA")
 print ("---------------------")
 
-upload_data(parsedData)
-
+upload_data(locs, parsedData)
 
 print ("Health Canada Drug Product Database Extraction Tool Finished!\n")

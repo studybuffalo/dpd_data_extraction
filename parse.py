@@ -1,138 +1,139 @@
-# -*- coding: latin-1 -*-
 import re
 
 def parse_extract_entry(file, line):
-    """Formats text to ensure standardization and redability.
-    
-    Takes a single line and formats it depending on the provided file 
-    name. Outputs text as a comma-separated list of strings ready for
-    upload to a MySQL database.
+    """Takes a list of strings improves standardization & readability
     
     Args:
-        file: the name of the file from which the line is extracted 
-              from.
-        line: the line of text to be formated.
+        file: the name of the file the list was extracted from
+        line: the list of strings to be parsed
     
     Returns:
-        returns a string of the formatted line, as a comma-separated
-        list.
+        Returns list of parsed strings
         
     Raises:
-        None at this time.
+        None.
     """
     
-    text = line.split('","')
     output = ""
     
     if file == "comp.txt" or file == "comp_ia.txt" or file == "comp_ap.txt":
-        drugCode     = text[0][1:]
-        mfrCode     = text[1]
-        compCode     = text[2]
-        compName     = parseCompanyName(text[3])
-        compType     = parseCompanyType(text[4])
-        mailFlag     = text[5]
-        billFlag     = text[6]
-        notifFlag     = text[7]
-        addressFlag    = text[8].title()
-        suite         = parseSuite(text[9])
-        street         = parseStreet(text[10])
-        city         = text[11].title()
-        province     = text[12].title()
-        country     = text[13].title()
-        postal        = text[14]
-        poBox         = text[15][:-3].title()
+        drugCode = line[0]
+        mfrCode = line[1]
+        compCode = line[2]
+        compName = parseCompanyName(line[3])
+        compType = parseCompanyType(line[4])
+        mailFlag = line[5]
+        billFlag = line[6]
+        notifFlag = line[7]
+        addressFlag = line[8].title()
+        suite = parseSuite(line[9])
+        street = parseStreet(line[10])
+        city = line[11].title()
+        province = line[12].title()
+        country = line[13].title()
+        postal = line[14]
+        poBox = line[15].title()
         
-        output = '"%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s"' % (drugCode, mfrCode, compCode, compName, compType, mailFlag, billFlag, notifFlag, addressFlag, suite, street, city, province, country, postal, poBox)
+        output = [
+            drugCode, mfrCode, compCode, compName, compType, mailFlag, 
+            billFlag, notifFlag, addressFlag, suite, street, city, province, 
+            country, postal, poBox
+        ]
     
     elif file == "drug.txt" or file == "drug_ia.txt" or file == "drug_ap.txt":
-        drugCode = text[0][1:]
-        product = parseProduct(text[1])
-        prodClass = text[2].title()
-        din = parseDIN(text[3])
-        brandName = parseBrand(text[4])
-        descriptor = parseDescriptor(text[5])
-        pedFlag = text[6]
-        accessionNum = text[7].title()
-        numAIS = text[8].title()
-        lastUpdate = parseDate(text[9])
-        aiNum = text[10][:-3].title()
+        drugCode = line[0]
+        product = parseProduct(line[1])
+        prodClass = line[2].title()
+        din = parseDIN(line[3])
+        brandName = parseBrand(line[4])
+        descriptor = parseDescriptor(line[5])
+        pedFlag = line[6]
+        accessionNum = line[7].title()
+        numAIS = line[8].title()
+        lastUpdate = parseDate(line[9])
+        aiNum = line[10].title()
         
-        output = '"%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s"' % (drugCode, product, prodClass, din, brandName, descriptor, pedFlag, accessionNum, numAIS, lastUpdate, aiNum)
+        output = [drugCode, product, prodClass, din, brandName, descriptor, 
+                  pedFlag, accessionNum, numAIS, lastUpdate, aiNum
+        ]
         
     elif file == "form.txt" or  file == "form_ia.txt" or  file == "form_ap.txt":
-        drugCode = text[0][1:]
-        formCode = text[1]
-        form = text[2][:-3].lower()
+        drugCode = line[0]
+        formCode = line[1]
+        form = line[2].lower()
         
-        output = '"%s","%s","%s"' % (drugCode, formCode, form)
+        output = [drugCode, formCode, form]
     
     elif file == "ingred.txt" or  file == "ingred_ia.txt" or  file == "ingred_ap.txt":
-        drugCode = text[0][1:]
-        ingredientCode = text[1]
-        ingredient = parseIngredient(text[2])
-        ingredientSupplied = text[3]
-        strength = text[4]
-        strengthUnit = parseUnit(text[5])
-        strengthType = text[6]
-        dosageValue = parseDosage(text[7])
-        base = text[8]
-        dosageUnit = parseUnit(text[9])
-        notes = text[10][:-3]
+        drugCode = line[0]
+        ingredientCode = line[1]
+        ingredient = parseIngredient(line[2])
+        ingredientSupplied = line[3]
+        strength = line[4]
+        strengthUnit = parseUnit(line[5])
+        strengthType = line[6]
+        dosageValue = parseDosage(line[7])
+        base = line[8]
+        dosageUnit = parseUnit(line[9])
+        notes = line[10]
         
-        output = '"%s","%s","%s","%s","%s","%s","%s","%s","%s","%s","%s"' % (drugCode, ingredientCode, ingredient, ingredientSupplied, strength, strengthUnit, strengthType, dosageValue, base, dosageUnit, notes)
+        output = [drugCode, ingredientCode, ingredient, ingredientSupplied, 
+                  strength, strengthUnit, strengthType, dosageValue, base, 
+                  dosageUnit, notes
+        ]
         
     elif file == "package.txt" or file == "package_ia.txt" or  file == "package_ap.txt":
-        drugCode = text[0][1:]
-        upc = parseUPC(text[1])
-        packageUnit = parseUnit(text[2])
-        packageType = parseUnit(text[3])
-        packageSize = parseDosage(text[4])
-        info = parseDescriptor(text[5][:-3])
+        drugCode = line[0]
+        upc = parseUPC(line[1])
+        packageUnit = parseUnit(line[2])
+        packageType = parseUnit(line[3])
+        packageSize = parseDosage(line[4])
+        info = parseDescriptor(line[5])
         
-        output = '"%s","%s","%s","%s","%s","%s"' % (drugCode, upc, packageUnit, packageType, packageSize, info)
+        output = [drugCode, upc, packageUnit, packageType, packageSize, info]
     
     elif file == "pharm.txt" or  file == "pharm_ia.txt" or  file == "pharm_ap.txt":
-        drugCode = text[0][1:]
-        pharmStand = parseStandard(text[1][:-3])
+        drugCode = line[0]
+        pharmStand = parseStandard(line[1])
         
-        output = '"%s","%s"' % (drugCode, pharmStand)
+        output = [drugCode, pharmStand]
     
     elif file == "route.txt" or  file == "route_ia.txt" or  file == "route_ap.txt":
-        drugCode = text[0][1:]
-        routeCode = text[1]
-        route = parseRoute(text[2][:-3])
+        drugCode = line[0]
+        routeCode = line[1]
+        route = parseRoute(line[2])
         
-        output = '"%s","%s","%s"' % (drugCode, routeCode, route)
+        output = [drugCode, routeCode, route]
     
     elif file == "schedule.txt" or  file == "schedule_ia.txt" or  file == "schedule_ap.txt":
-        drugCode = text[0][1:]
-        schedule = text[1][:-3]
+        drugCode = line[0]
+        schedule = line[1]
         
-        output = '"%s","%s"' % (drugCode, schedule)
+        output = [drugCode, schedule]
     
     elif file == "status.txt" or  file == "status_ia.txt" or  file == "status_ap.txt":
-        drugCode = text[0][1:]
-        statusFlag = text[1]
-        status = text[2].title()
-        historyDate = parseDate(text[3][:-3])
+        drugCode = line[0]
+        statusFlag = line[1]
+        status = line[2].title()
+        historyDate = parseDate(line[3])
         
-        output = '"%s","%s","%s","%s"' % (drugCode, statusFlag, status, historyDate)
+        output = [drugCode, statusFlag, status, historyDate]
     
     elif file == "ther.txt" or  file == "ther_ia.txt" or  file == "ther_ap.txt":
-        drugCode = text[0][1:]
-        atcNum = text[1]
-        atc = text[2].lower()
-        ahfsNum = text[3]
-        ahfs = parseAHFS(text[4][:-3])
+        drugCode = line[0]
+        atcNum = line[1]
+        atc = line[2].lower()
+        ahfsNum = line[3]
+        ahfs = parseAHFS(line[4])
         
-        output = '"%s","%s","%s","%s","%s"' % (drugCode, atcNum, atc, ahfsNum, ahfs)
+        output = [drugCode, atcNum, atc, ahfsNum, ahfs]
     
     elif file == "vet.txt" or  file == "vet_ia.txt" or  file == "vet_ap.txt":
-        drugCode = text[0][1:]
-        species = text[1].lower()
-        subSpecies = text[2][:-3].lower()
+        drugCode = line[0]
+        species = line[1].lower()
+        subSpecies = line[2].lower()
         
-        output = '"%s","%s","%s"' % (drugCode, species, subSpecies)
+        output = [drugCode, species, subSpecies]
     
     else:
         print("Error - %s not found" % file)
@@ -141,17 +142,8 @@ def parse_extract_entry(file, line):
 
 
 def parseAHFS(text):
-    '''Formats the AHFS category for the drug product.
-    
-    Args:
-        text: the AHFS category string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
+    """Formats the AHFS category for the drug product."""
+
     text = text.title()
     
     #Removes extra space characters
@@ -186,17 +178,8 @@ def parseAHFS(text):
     return text
 
 def parseBrand(text):
-    '''Formats drug product brand name.
-    
-    Args:
-        text: the brand name string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
+    """Formats drug product brand name."""
+
     text = text.title()
     
     #Removes extra space characters
@@ -2649,17 +2632,7 @@ def parseBrand(text):
     return text
 
 def parseCompanyName(text):
-    '''Formats company names.
-    
-        Args:
-            text: the company name string to be formated.
-            
-        Returns:
-            The formatted string.
-        
-        Raises:
-            None.
-    '''
+    """Formats company names."""
     
     text = text.title()
     
@@ -3086,22 +3059,14 @@ def parseCompanyName(text):
     return text
 
 def parseCompanyType(text):
-    '''Formats company type.
-    
-    Args:
-        text: the company type string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
+    """Formats company type."""
+
     text = text.title()
     text = text.replace("Din", "DIN")
     return text
 
 def parseDate(text):
+    """Parses date into MySQL readable date"""
     date = text.split("-")
     
     date[1] = date[1].replace("JAN", "01")
@@ -3122,17 +3087,8 @@ def parseDate(text):
     return text
 
 def parseDescriptor(text):
-    '''Formats drug entry descriptior information.
-    
-    Args:
-        text: the descriptor string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
+    """Formats drug entry descriptior information."""
+
     text = text.lower()
     
     #Removes extra space characters
@@ -4214,49 +4170,21 @@ def parseDescriptor(text):
     return text
 
 def parseDIN(text):
-    '''Cleans up non-conforming DINs
-    
-    Args:
-        text: the DIN string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
+    """Cleans up non-conforming DINs"""
     
     text = text.replace("Not Applicable/non applicable", "NA")
     
     return text
 
 def parseDosage(text):
-    '''Formats dosages of drug products.
-    
-    Args:
-        text: the dosage string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
+    """Formats dosages of drug products."""
+
     text = text[:1].replace(".", "0.") + text[1:]
     return text
 
 def parseIngredient(text):
-    '''Formats the ingredient for drug products.
+    """Formats the ingredient for drug products."""
     
-    Args:
-        text: the ingredient string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
     text = text.lower()
     
     #Removes extra space characters
@@ -5030,17 +4958,8 @@ def parseIngredient(text):
     return text
 
 def parseProduct(text):
-    '''Formats drug product category.
-    
-    Args:
-        text: the product string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
+    """Formats drug product category."""
+
     text = text.title()
 
     #Removes extra space characters
@@ -5067,17 +4986,8 @@ def parseProduct(text):
     return text
 
 def parseRoute(text):
-    '''Formats the route of administration for a drug product.
-    
-    Args:
-        text: the route string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
+    """Formats the route of administration for a drug product."""
+
     text = text.lower()
     #Removes extra space characters
     text = re.sub(r"\s{2,}", " ", text)
@@ -5095,17 +5005,8 @@ def parseRoute(text):
     return text
 
 def parseStandard(text):
-    '''Formats the formulary standard for the drug product.
-    
-    Args:
-        text: the formulary standard string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
+    """Formats the formulary standard for the drug product."""
+
     #Removes extra space characters
     text = re.sub(r"\s{2,}", " ", text)
     
@@ -5122,17 +5023,8 @@ def parseStandard(text):
     return text
 
 def parseStreet(text):
-    '''Formats street number/name.
-    
-    Args:
-        text: the street string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
+    """Formats street number/name."""
+
     text = text.title()
 
     #Removes extra space characters
@@ -5192,17 +5084,8 @@ def parseStreet(text):
     return text
 
 def parseSuite(text):
-    '''Formats company suite number/name.
-    
-    Args:
-        text: the suite string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
+    """Formats company suite number/name."""
+
     text = text.title()
 
     #Removes extra space characters
@@ -5241,17 +5124,8 @@ def parseSuite(text):
     return text
 
 def parseUnit(text):
-    '''Formats units of measurements.
-    
-    Args:
-        text: the unit string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
+    """Formats units of measurements."""
+
     text = text.lower()
     
     #Removes extra space characters
@@ -5319,17 +5193,8 @@ def parseUnit(text):
     return text
 
 def parseUPC(text):
-    '''Formats the UPC of a drug product.
+    """Formats the UPC of a drug product."""
     
-    Args:
-        text: the UPC string to be formatted.
-        
-    Returns:
-        The formatted string.
-        
-    Raises:
-        None.
-    '''
     #Removes extra space characters
     text = re.sub(r"\s{2,}", " ", text)
     

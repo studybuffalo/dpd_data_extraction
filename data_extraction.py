@@ -216,8 +216,7 @@ def get_file_names(locs):
         {
             "name": "allfiles.zip",
             "files": [
-                FileDetails("comp", "", locs),
-                FileDetails("drug", "", locs)
+                FileDetails("comp", "", locs)
             ]
          }
     ]
@@ -302,11 +301,24 @@ def unzip_zips(locs, names):
     print ("\n")
 
 def parse_files(names):
+    # Array that will collect all parsed extracts
+    parseArray = {
+        "comp": [],
+        "drug": [],
+        "form": [],
+        "ingred": [],
+        "package": [],
+        "pharm": [],
+        "route": [],
+        "schedule": [],
+        "status": [],
+        "ther": [],
+        "vet": []
+    }
+
     # Cycles through each suffix
     for zip in names:
         for file in zip["files"]:
-            parseArray = []
-
             # File details
             title = file.title
             name = file.name
@@ -316,11 +328,9 @@ def parse_files(names):
             # Details for progress bar
             length = file_len(ePath)
             i = 1
-            temp = [];
-            
-            # Name for progress bar (23 chars to all progress bars)
+            temp = []
             pbTitle = "Parsing %s" % name
-            pbTitle = pbTitle.ljust(23)
+            pbTitle = pbTitle.ljust(23) # Pad  to align progress bars
 
             # Open extracted file and parse it
             with open(ePath, "r") as ext:
@@ -330,28 +340,31 @@ def parse_files(names):
                 # Read each line of file & output array of parsed text
                 for line in csvFile:
                     # Parse list
-                    parseArray.append(parse_extract_entry(name, line))
+                    parseArray[title].append(parse_extract_entry(name, line))
 
                     # Display progress bar and increment counter
                     progress_bar(pbTitle, i, 1, length)
                     i = i + 1
-            
-            # Save parsed text to file
-            with open(pPath, 'w', newline="") as pFile:
-                # Create writer to convert list to text
-                csvWriter = csv.writer(pFile, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL)
-
-                # Writer all lines to file
-                print ("Saving parsed extracts to file... ", end="")
-                
-                csvWriter.writerows (parseArray)
-                
-                print ("Complete!\n")
-
+        
         print ("")
+    
+    # Save parsed text to file
+    for key in parseArray:
+        with open(pPath, 'w', newline="") as pFile:
+            # Create writer to convert list to text
+            csvWriter = csv.writer(pFile, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL)
+
+            # Writer all lines to file
+            print ("Saving parsed %s entries to file... " % key, end="")
+            
+            # TO FIX - NOT WRITING TO FILE, BUT IS COLLECTING DATA
+            csvWriter.writerows(parseArray[key])
+                
+            print ("Complete!")
+    
     print ("")
 
-    return ""
+    return parseArray
 
 def upload_data(loc, data):
     """Uploads parsed files to the database."""

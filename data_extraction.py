@@ -73,6 +73,7 @@ import configparser
 from parse import parse_extract_entry
 from upload import upload_to_table
 
+
 class FileDetails(object):
     title = ""
     suffix = ""
@@ -206,30 +207,6 @@ def get_file_names(locs):
                 FileDetails("status", "ia", locs),
                 FileDetails("ther", "ia", locs),
                 FileDetails("vet", "ia", locs)
-            ]
-         }
-    ]
-
-    names = [
-        {
-            "name": "allfiles.zip",
-            "files": [
-                FileDetails("pharm", "", locs),
-                FileDetails("status", "", locs)
-            ]
-         },
-         {
-            "name": "allfiles_ap.zip",
-            "files": [
-                FileDetails("pharm", "ap", locs),
-                FileDetails("status", "ap", locs)
-            ]
-         },
-         {
-            "name": "allfiles_ia.zip",
-            "files": [
-                FileDetails("pharm", "ia", locs),
-                FileDetails("status", "ia", locs)
             ]
          }
     ]
@@ -377,6 +354,22 @@ def parse_files(locs, names):
             print ("Complete!")
     
     print ("")
+
+    # Delete the extracted text files
+    for zip in names:
+        for file in zip["files"]:
+            # File details
+            name = file.name
+            ePath = file.ePath
+
+            # Delete the specified file
+            print (("Deleting %s... " % name), end="")
+
+            os.remove(ePath)
+
+            print ("Complete!")
+
+    print ("\n")
 
     return parseArray
 

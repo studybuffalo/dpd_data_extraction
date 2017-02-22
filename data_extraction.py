@@ -95,11 +95,11 @@ class FileDetails(object):
 
 
 def file_len(fname):
-	"""Calculates the number of lines in a file."""
-	with open(fname) as f:
-		for i, l in enumerate(f):
-			pass
-	return i + 1
+    """Calculates the number of lines in a file."""
+    with open(fname, encoding="latin-1") as f:
+        for i, l in enumerate(f):
+            pass
+    return i + 1
 
 def progress_bar(title, curPos, start, stop):
 	"""Generates progress bar in console."""
@@ -321,7 +321,7 @@ def parse_files(locs, names):
             pbTitle = pbTitle.ljust(23) # Pad  to align progress bars
 
             # Open extracted file and parse it
-            with open(ePath, "r") as ext:
+            with open(ePath, "r", encoding="latin-1") as ext:
                 # Treats text file as csv and converts lines to list
                 csvFile = csv.reader(ext, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL)
 
@@ -436,7 +436,7 @@ names = get_file_names(locs)
 print ("DOWNLOADING DATA EXTRACTIONS ZIP FILES")
 print ("--------------------------------------")
 
-download_zips(locs, names)
+# download_zips(locs, names)
 
 
 # Extract the data extracts from the zip files

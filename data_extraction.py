@@ -87,12 +87,10 @@ class FileDetails(object):
 
         # Generate paths of extracted and parsed files
         ePath = locs["eLoc"].child(name)
-        pPath = locs["pLoc"].child(name)
 
         self.title = title
         self.name = name
         self.ePath = ePath
-        self.pPath = pPath
 
 
 def file_len(fname):
@@ -216,7 +214,22 @@ def get_file_names(locs):
         {
             "name": "allfiles.zip",
             "files": [
-                FileDetails("comp", "", locs)
+                FileDetails("pharm", "", locs),
+                FileDetails("status", "", locs)
+            ]
+         },
+         {
+            "name": "allfiles_ap.zip",
+            "files": [
+                FileDetails("pharm", "ap", locs),
+                FileDetails("status", "ap", locs)
+            ]
+         },
+         {
+            "name": "allfiles_ia.zip",
+            "files": [
+                FileDetails("pharm", "ia", locs),
+                FileDetails("status", "ia", locs)
             ]
          }
     ]
@@ -300,7 +313,7 @@ def unzip_zips(locs, names):
 
     print ("\n")
 
-def parse_files(names):
+def parse_files(locs, names):
     # Array that will collect all parsed extracts
     parseArray = {
         "comp": [],
@@ -323,7 +336,6 @@ def parse_files(names):
             title = file.title
             name = file.name
             ePath = file.ePath
-            pPath = file.pPath
 
             # Details for progress bar
             length = file_len(ePath)
@@ -350,6 +362,8 @@ def parse_files(names):
     
     # Save parsed text to file
     for key in parseArray:
+        pPath = locs["pLoc"].child("%s.txt" % key)
+
         with open(pPath, 'w', newline="") as pFile:
             # Create writer to convert list to text
             csvWriter = csv.writer(pFile, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL)
@@ -392,7 +406,7 @@ def upload_data(loc, data):
     conn = pymysql.connect(host, user, pw, db)
     cursor = conn.cursor()
 
-    print ("Complete!")
+    print ("Complete!\n")
     
     # Uploads data to each table
     for tableName in tableList:
@@ -406,6 +420,8 @@ def upload_data(loc, data):
         
     # Close connection to database
     conn.close()
+
+    print("\n")
     
 
 
@@ -428,7 +444,7 @@ names = get_file_names(locs)
 print ("DOWNLOADING DATA EXTRACTIONS ZIP FILES")
 print ("--------------------------------------")
 
-# download_zips(locs, names)
+download_zips(locs, names)
 
 
 # Extract the data extracts from the zip files
@@ -442,7 +458,7 @@ unzip_zips(locs, names)
 print ("PARSING FILES")
 print ("-------------")
 
-parsedData = parse_files(names)
+parsedData = parse_files(locs, names)
 
 #Upload the parsed files to the database
 print ("UPLOADING PARSED DATA")

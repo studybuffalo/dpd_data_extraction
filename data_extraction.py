@@ -71,7 +71,7 @@ import pymysql
 import configparser
 
 from parse import parse_extract_entry
-import upload
+from upload import upload_to_table
 
 class FileDetails(object):
     title = ""
@@ -394,46 +394,16 @@ def upload_data(loc, data):
 
     print ("Complete!")
     
-    # Uploads data to each database
+    # Uploads data to each table
     for tableName in tableList:
         print (("Uploading to '%s' table... " % tableName), end="")
-        '''
-        #Truncates table to prepare for new entries
-        try:
-            cursor.execute("TRUNCATE %s" % tableName)
-            conn.commit()
-        except MySQLdb.Error as e:
-            print ("Error Truncating Table: %s" % e)
-            pass
-        
-        #Assembling path to parsed text file
-        fileName = os.path.join(scriptDir, "Parsed_Data", date, tableName + ".txt")
-        fileName = os.path.normpath(fileName)
-        
-        tempList = []
-        length = file_len(fileName)
-        i = 1
-        n = 1
-        
-        # Opens file with 'latin-1' encoding
-        with codecs.open(fileName, encoding='latin-1') as file:
-            for line in file:
-                # Generates MySQL statement and loads into database
-                tempList.append(upload.generate_upload(tableName, line))
-            
-            statement = upload.generate_statement(tableName)
-            
-            try:
-                cursor.executemany(statement, tempList)
-                conn.commit()
-                print ("Complete!")
-            except MySQLdb.Error as e:
-                print ("Error trying insert entry %s into database: %s" % (i, e))
-                pass
 
-        # PROGRESS BAR SOMEWHERE IN HERE?
-        '''
+        upload_to_table(cursor, tableName, data[tableName])
+
         print ("Complete!")
+        
+        # PROGRESS BAR SOMEWHERE IN HERE?
+        
     # Close connection to database
     conn.close()
     

@@ -126,8 +126,7 @@ def progress_bar(title, curPos, start, stop):
 def create_extract_folders():
     """Creates the folders for holding the extracted files"""
     # Sets script directory to allow absolute path naming (for Cron job)
-    # root = Path("/", "home", "joshua", "scripts", "dpd_data_extraction")
-    root = Path("E:\\", "My Documents", "GitHub", "dpd_data_extraction")
+    root = Path("/", "home", "joshua", "scripts", "dpd_data_extraction")
     
     # Get the date
     today = datetime.date.today()

@@ -122,12 +122,33 @@ def progress_bar(title, curPos, start, stop):
 		progComp = "#" * 50
 		print("%s [%s] Complete!" % (title, progComp))
 
+def get_permission(robotFile):
+    """Checks the specified robot.txt file for access permission."""
+    robot = robotparser.RobotFileParser()
+    robot.set_url(robotFile)
+    robot.read()
+    
+    print ("Checking robots.txt... ", end="")
+
+    can_crawl = robot.can_fetch(
+		"Study Buffalo Data Extraction (http://www.studybuffalo.com/dataextraction/)",
+		"https://idbl.ab.bluecross.ca/idbl/load.do")
+    
+    if can_crawl == True:
+        print ("Permission Granted!\n\n")
+    else:
+        print ("Permission Rejected.")
+
+    return can_crawl
 
 def create_extract_folders():
     """Creates the folders for holding the extracted files"""
     # Sets script directory to allow absolute path naming (for Cron job)
-    root = Path("/", "home", "joshua", "scripts", "dpd_data_extraction")
-    
+    # Ubuntu Path
+    # root = Path("/", "home", "joshua", "scripts", "dpd_data_extraction")
+    # Windows Path
+    root = Path("E:\\", "My Documents", "GitHub", "dpd_data_extraction")
+
     # Get the date
     today = datetime.date.today()
     year = today.year
@@ -213,18 +234,6 @@ def get_file_names(locs):
     print ("Complete!\n\n")
 
     return names
-
-def get_permission(robotFile):
-    """Checks the specified robot.txt file for access permission."""
-    robot = robotparser.RobotFileParser()
-    robot.set_url(robotFile)
-    robot.read()
-    
-    can_crawl = robot.can_fetch(
-		"Study Buffalo Data Extraction (http://www.studybuffalo.com/dataextraction/)",
-		"https://idbl.ab.bluecross.ca/idbl/load.do")
-    
-    return can_crawl
 
 def download_zips(locs, zipFiles):
     # Root URL to access all the zip files
@@ -421,41 +430,46 @@ print ("\nHEALTH CANADA DRUG PRODUCT DATABASE DATA EXTRACTION TOOL")
 print ("--------------------------------------------------------")
 print ("Created by Joshua Torrance, 2017-Feb-20\n\n")
 
-print ("CREATE APPLICATION FOLDERS AND FILE DETAILS")
-print ("----------------------------------------------")
-
 # Get permission to access the Health Canada website
+print ("CHECKING FOR PERMISSION TO RUN")
+print ("------------------------------")
 
-# Create the extract folders and save the paths
-locs = create_extract_folders()
-
-# Create a list of all file names, locations, and other details
-names = get_file_names(locs)
+permission = get_permission("http://www.hc-sc.gc.ca/robots.txt")
 
 # Downloads zip files
-print ("DOWNLOADING DATA EXTRACTIONS ZIP FILES")
-print ("--------------------------------------")
+if permission:
+    print ("CREATE APPLICATION FOLDERS AND FILE DETAILS")
+    print ("----------------------------------------------")
 
-# download_zips(locs, names)
+    # Create the extract folders and save the paths
+    locs = create_extract_folders()
+
+    # Create a list of all file names, locations, and other details
+    names = get_file_names(locs)
+
+    print ("DOWNLOADING DATA EXTRACTIONS ZIP FILES")
+    print ("--------------------------------------")
+
+    download_zips(locs, names)
 
 
-# Extract the data extracts from the zip files
-print ("UNZIPPING FILES")
-print ("-------------------------------")
+    # Extract the data extracts from the zip files
+    print ("UNZIPPING FILES")
+    print ("-------------------------------")
 
-unzip_zips(locs, names)
+    unzip_zips(locs, names)
 
 
-# Parse the data extracts and return the data
-print ("PARSING FILES")
-print ("-------------")
+    # Parse the data extracts and return the data
+    print ("PARSING FILES")
+    print ("-------------")
 
-parsedData = parse_files(locs, names)
+    parsedData = parse_files(locs, names)
 
-#Upload the parsed files to the database
-print ("UPLOADING PARSED DATA")
-print ("---------------------")
+    #Upload the parsed files to the database
+    print ("UPLOADING PARSED DATA")
+    print ("---------------------")
 
-upload_data(locs, parsedData)
+    upload_data(locs, parsedData)
 
-print ("Health Canada Drug Product Database Extraction Tool Finished!\n")
+    print ("Health Canada Drug Product Database Extraction Tool Finished!\n")

@@ -447,6 +447,8 @@ if permission:
     # Create a list of all file names, locations, and other details
     names = get_file_names(locs)
 
+
+    # Download the zip files from the website
     print ("DOWNLOADING DATA EXTRACTIONS ZIP FILES")
     print ("--------------------------------------")
 
@@ -466,10 +468,12 @@ if permission:
 
     parsedData = parse_files(locs, names)
 
-    #Upload the parsed files to the database
+
+    # Upload the parsed files to the database
     print ("UPLOADING PARSED DATA")
     print ("---------------------")
 
     upload_data(locs, parsedData)
+
 
     print ("Health Canada Drug Product Database Extraction Tool Finished!\n")

@@ -1,4 +1,4 @@
-# Health Canada Drup Product Database Data Extracton Tool
+# Health Canada Drug Product Database Data Extracton Tool
 This program downloads the Health Canada Drug Product Database data extracts, normalizes the data, and uploads the data to a Django database.
 
 ## Technical Details

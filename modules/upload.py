@@ -86,3 +86,48 @@ def upload_to_table(cur, name, data):
     # Upload new data to table
     query = generate_query(name)
     cur.executemany(query, data)
+
+
+def upload_data(loc, data):
+    """Uploads parsed files to the database."""
+    #List of database tables
+    tableList = [
+        "comp", "drug", "form", "ingred", "package", "pharm", "route", 
+        "schedule", "status", "ther", "vet",
+    ]
+
+    # Obtain database credentials
+    cLoc = loc["root"].parent.child("config", "python_config.cfg").absolute()
+    
+    
+    config = configparser.ConfigParser()
+    config.read(cLoc)
+
+    db = config.get("mysql_db_dpd", "db")
+    host = config.get("mysql_db_dpd", "host")
+    user = config.get("mysql_user_dpd_ent", "user")
+    pw = config.get("mysql_user_dpd_ent", "password")
+
+    # Connect to database
+    print ("Connecting to database... ", end="")
+    
+    conn = pymysql.connect(host, user, pw, db)
+    cursor = conn.cursor()
+
+    print ("Complete!\n")
+    
+    # Uploads data to each table
+    for tableName in tableList:
+        print (("Uploading to '%s' table... " % tableName), end="")
+
+        upload_to_table(cursor, tableName, data[tableName])
+
+        print ("Complete!")
+        
+        # PROGRESS BAR SOMEWHERE IN HERE?
+        
+    # Close connection to database
+    conn.close()
+
+    print("\n")
+    

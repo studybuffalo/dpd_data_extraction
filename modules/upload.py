@@ -97,7 +97,10 @@ def save_to_model(item, model_name, origin):
             brand_name_f=item["brand_name_f"],
             descriptor_f=item["descriptor_f"],
         )
-        model.save()
+        try:
+            model.save()
+        except Exception:
+            log.warn("Unable to save entry: {}".format(item), exc_info=True)
 
     # Form
     elif model_name == "Form":

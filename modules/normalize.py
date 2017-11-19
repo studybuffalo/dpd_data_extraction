@@ -82,7 +82,7 @@ def normalize_drug_product(data):
             "pediatric_flag": convert_boolean(item[6], "Y"),
             "accession_number": item[7],
             "number_of_ais": item[8],
-            "late_update_date": convert_date(item[9]),
+            "last_update_date": convert_date(item[9]),
             "ai_group_no": item[10],
             "class_f": item[11],
             "brand_name_f": item[12],

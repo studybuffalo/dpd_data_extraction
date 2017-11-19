@@ -91,7 +91,7 @@ def save_to_model(item, model_name, origin):
             pediatric_flag=item["pediatric_flag"],
             accession_number=item["accession_number"],
             number_of_ais=item["number_of_ais"],
-            late_update_date=item["late_update_date"],
+            last_update_date=item["last_update_date"],
             ai_group_no=item["ai_group_no"],
             class_f=item["class_f"],
             brand_name_f=item["brand_name_f"],

@@ -184,9 +184,9 @@ def save_to_model(item, model_name, origin):
     elif model_name == "VeterinarySpecies":
         model = VeterinarySpecies(
             drug_code=dpd_entry,
-            vet_species=item[""],
-            vet_sub_species=item[""],
-            vet_species_f=item[""],
+            vet_species=item["vet_species"],
+            vet_sub_species=item["vet_sub_species"],
+            vet_species_f=item["vet_species_f"],
         )
         model.save()
     

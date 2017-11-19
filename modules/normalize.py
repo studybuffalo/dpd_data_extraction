@@ -224,6 +224,8 @@ def normalize_veterinary_status(data):
 
 def normalize_entries(data, model):
     """Normalizes the data based on the provided model"""
+    normalized_data = None
+
     # ActiveIngredient
     if model == "ActiveIngredients":
         normalized_data = normalize_active_ingredients(data)

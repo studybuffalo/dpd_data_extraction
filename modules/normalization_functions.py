@@ -1,4 +1,5 @@
 from datetime import date
+import re
 
 def convert_integer(txt):
     """Converts the provided text to an integer"""
@@ -19,16 +20,16 @@ def convert_date(txt):
         "NOV": "11", "DEC": "12"
     }
 
-    parts = txt.split("-")
+    if re.search(r"^\d{2}-[a-zA-Z]{3}-\d{4}$", txt):
+        parts = txt.split("-")
 
-    day = parts[0]
-    month = months[parts[1]]
-    year = parts[2]
+        day = parts[0]
+        month = months[parts[1]]
+        year = parts[2]
     
-    return date(year, month, day)
-
-import re
-
+        return date(year, month, day)
+    else:
+        return None
 
 
 

@@ -1,4 +1,36 @@
+from datetime import date
+
+def convert_integer(txt):
+    """Converts the provided text to an integer"""
+    return int(txt)
+
+def convert_boolean(txt, yes):
+    """Converts provided text to boolean, based on the yes value"""
+    if txt.upper() == yes.upper():
+        return true
+    else:
+        return false
+
+def convert_date(txt):
+    """Converts the provided text to a date object"""
+    months = {
+        "JAN": "01", "FEB": "02", "MAR": "03", "APR": "04", "MAY": "05", 
+        "JUN": "06", "JUL": "07", "AUG": "08", "SEP": "09", "OCT": "10",
+        "NOV": "11", "DEC": "12"
+    }
+
+    parts = txt.split("-")
+
+    day = parts[0]
+    month = months[parts[1]]
+    year = parts[2]
+    
+    return date(year, month, day)
+
 import re
+
+
+
 
 def parseAHFS(text):
     """Formats the AHFS category for the drug product."""
@@ -2922,27 +2954,6 @@ def parseCompanyType(text):
 
     text = text.title()
     text = text.replace("Din", "DIN")
-    return text
-
-def parseDate(text):
-    """Parses date into MySQL readable date"""
-    date = text.split("-")
-    
-    date[1] = date[1].replace("JAN", "01")
-    date[1] = date[1].replace("FEB", "02")
-    date[1] = date[1].replace("MAR", "03")
-    date[1] = date[1].replace("APR", "04")
-    date[1] = date[1].replace("MAY", "05")
-    date[1] = date[1].replace("JUN", "06")
-    date[1] = date[1].replace("JUL", "07")
-    date[1] = date[1].replace("AUG", "08")
-    date[1] = date[1].replace("SEP", "09")
-    date[1] = date[1].replace("OCT", "10")
-    date[1] = date[1].replace("NOV", "11")
-    date[1] = date[1].replace("DEC", "12")
-    
-    text = "%s-%s-%s" % (date[2], date[1], date[0])
-    
     return text
 
 def parseDescriptor(text):

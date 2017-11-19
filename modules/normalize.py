@@ -1,3 +1,4 @@
+from .normalization_functions import convert_integer, convert_boolean, convert_date
 
 def normalize_active_ingredients(data):
     """Normalizes the active ingredient entries"""
@@ -6,7 +7,7 @@ def normalize_active_ingredients(data):
     # Cycle through each entry
     for item in data:
         normalized_data.append({
-            "drug_code": item[0],
+            "drug_code": convert_integer(item[0]),
             "active_ingredient_code": item[1],
             "ingredient": item[2],
             "ingredient_supplied_ind": item[3],
@@ -14,7 +15,7 @@ def normalize_active_ingredients(data):
             "strength_unit": item[5],
             "strength_type": item[6],
             "dosage_value": item[7],
-            "base": item[8],
+            "base": convert_boolean(item[8], "Y"),
             "dosage_unit": item[9],
             "notes": item[10],
             "ingredient_f": item[11],
@@ -31,15 +32,15 @@ def normalize_companies(data):
     # Cycle through each entry
     for item in data:
         normalized_data.append({
-            "drug_code": item[0],
+            "drug_code": convert_integer(item[0]),
             "mfr_code": item[1],
-            "company_code": item[2],
+            "company_code": convert_integer(item[2]),
             "company_name": item[3],
             "company_type": item[4],
-            "address_mailing_flag": item[5],
-            "address_billing_flag": item[6],
-            "address_notification_flag": item[7],
-            "address_other": item[8],
+            "address_mailing_flag": convert_boolean(item[5], "Y"),
+            "address_billing_flag": convert_boolean(item[6], "Y"),
+            "address_notification_flag": convert_boolean(item[7], "Y"),
+            "address_other": convert_boolean(item[8], "Y"),
             "suite_number": item[9],
             "street_name": item[10],
             "city_name": item[11],
@@ -59,19 +60,20 @@ def normalize_drug_product(data):
     # Cycle through each entry
     for item in data:
         normalized_data.append({
-            "drug_code": item[0],
+            "drug_code": convert_integer(item[0]),
             "product_categorization": item[1],
             "class_": item[2],
-            "brand_name": item[3],
-            "descriptor": item[4],
-            "pediatric_flag": item[5],
-            "accession_number": item[6],
-            "number_of_ais": item[7],
-            "late_update_date": item[8],
-            "ai_group_no": item[9],
-            "class_f": item[10],
-            "brand_name_f": item[11],
-            "descriptor_f": item[12],
+            "drug_identification_number": item[3],
+            "brand_name": item[4],
+            "descriptor": item[5],
+            "pediatric_flag": convert_boolean(item[6], "Y"),
+            "accession_number": item[7],
+            "number_of_ais": item[8],
+            "late_update_date": convert_date(item[9]),
+            "ai_group_no": item[10],
+            "class_f": item[11],
+            "brand_name_f": item[12],
+            "descriptor_f": item[13],
         })
     
     return normalized_data
@@ -82,8 +84,8 @@ def normalize_form(data):
     # Cycle through each entry
     for item in data:
         normalized_data.append({
-            "drug_code": item[0],
-            "pharm_form_code": item[1],
+            "drug_code": convert_integer(item[0]),
+            "pharm_form_code": convert_integer(item[1]),
             "pharmaceutical_form": item[2],
             "pharmaceutical_form_f": item[3],
         })
@@ -96,10 +98,10 @@ def normalize_inactive_products(data):
     # Cycle through each entry
     for item in data:
         normalized_data.append({
-            "drug_code": item[0],
+            "drug_code": convert_integer(item[0]),
             "drug_identification_number": item[1],
             "brand_name": item[2],
-            "history_date": item[3],
+            "history_date": convert_date(item[3]),
         })
     
     return normalized_data
@@ -110,7 +112,7 @@ def normalize_packaging(data):
     # Cycle through each entry
     for item in data:
         normalized_data.append({
-            "drug_code": item[0],
+            "drug_code": convert_integer(item[0]),
             "upc": item[1],
             "package_size_unit": item[2],
             "package_type": item[3],
@@ -128,7 +130,7 @@ def normalize_pharmaceutical_standard(data):
     # Cycle through each entry
     for item in data:
         normalized_data.append({
-            "drug_code": item[0],
+            "drug_code": convert_integer(item[0]),
             "pharmaceutical_std": item[1],
         })
     
@@ -140,8 +142,8 @@ def normalize_route(data):
     # Cycle through each entry
     for item in data:
         normalized_data.append({
-            "drug_code": item[0],
-            "route_of_administration_code": item[1],
+            "drug_code": convert_integer(item[0]),
+            "route_of_administration_code": convert_integer(item[1]),
             "route_of_administration": item[2],
             "route_of_administration_f": item[3],
         })
@@ -154,7 +156,7 @@ def normalize_schedule(data):
     # Cycle through each entry
     for item in data:
         normalized_data.append({
-            "drug_code": item[0],
+            "drug_code": convert_integer(item[0]),
             "schedule": item[1],
             "schedule_f": item[2],
         })
@@ -167,13 +169,13 @@ def normalize_status(data):
     # Cycle through each entry
     for item in data:
         normalized_data.append({
-            "drug_code": item[0],
-            "current_status_flag": item[1],
+            "drug_code": convert_integer(item[0]),
+            "current_status_flag": convert_boolean(item[1], "Y"),
             "status": item[2],
             "history_date": item[3],
             "status_f": item[4],
             "lot_number": item[5],
-            "expiration_date": item[6],
+            "expiration_date": convert_date(item[6]),
         })
     
     return normalized_data
@@ -184,7 +186,7 @@ def normalize_therapeutic_class(data):
     # Cycle through each entry
     for item in data:
         normalized_data.append({
-            "drug_code": item[0],
+            "drug_code": convert_integer(item[0]),
             "tc_atc_number": item[1],
             "tc_atc": item[2],
             "tc_ahfs_number": item[3],
@@ -201,7 +203,7 @@ def normalize_veterinary_status(data):
     # Cycle through each entry
     for item in data:
         normalized_data.append({
-            "drug_code": item[0],
+            "drug_code": convert_integer(item[0]),
             "vet_species": item[1],
             "vet_sub_species": item[2],
             "vet_species_f": item[3],

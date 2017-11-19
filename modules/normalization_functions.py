@@ -55,7 +55,11 @@ def convert_date(txt):
     else:
         return None
 
-
+def correct_din(txt):
+    if txt.upper() == "NOT APPLICABLE/NON APPLICABLE":
+        return "N/A"
+    else:
+        return txt
 
 def parseAHFS(text):
     """Formats the AHFS category for the drug product."""

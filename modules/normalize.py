@@ -1,6 +1,8 @@
 import logging
 
-from .normalization_functions import convert_integer, convert_boolean, convert_date
+from .normalization_functions import (
+    convert_integer, convert_boolean, convert_date, correct_din
+)
 
 
 # Setup logging
@@ -72,7 +74,7 @@ def normalize_drug_product(data):
             "drug_code": convert_integer(item[0]),
             "product_categorization": item[1],
             "class_e": item[2],
-            "drug_identification_number": item[3],
+            "drug_identification_number": correct_din(item[3]),
             "brand_name": item[4],
             "descriptor": item[5],
             "pediatric_flag": convert_boolean(item[6], "Y"),
@@ -110,7 +112,7 @@ def normalize_inactive_products(data):
     for item in data:
         normalized_data.append({
             "drug_code": convert_integer(item[0]),
-            "drug_identification_number": item[1],
+            "drug_identification_number": correct_din(item[1]),
             "brand_name": item[2],
             "history_date": convert_date(item[3]),
         })

@@ -7,9 +7,9 @@ def convert_integer(txt):
 def convert_boolean(txt, yes):
     """Converts provided text to boolean, based on the yes value"""
     if txt.upper() == yes.upper():
-        return true
+        return True
     else:
-        return false
+        return False
 
 def convert_date(txt):
     """Converts the provided text to a date object"""

@@ -9,13 +9,42 @@ import math
 # Setup logging
 log = logging.getLogger(__name__)
 
-def unzip_files(config):
-    """Unzips the download files"""
+def get_extensions(config):
+    """Returns a list of extensions"""
+    # Get the extension list
     extensions = config.get("zips", "extensions").split(",")
 
-    # Sets up location to the zip files
+    # Trim any white space (incase the comma was followed by a space)
+    return [e.strip() for e in extensions]
+
+def get_root_path(config):
+    """Constructs a path to the directory containg the data extracts"""
     date = datetime.utcnow().strftime("%Y-%m-%d")
     root_path = Path(config.get("zips", "save_loc")).child(date)
+
+    return root_path
+
+def get_data_files(config, ext):
+    """Returns a list of file names for the provided extension"""
+    data_files = config.get("files_{}".format(ext), "files").split(",")
+    
+    # Trim any white space (incase the comma was followed by a space)
+    return [f.strip() for f in data_files]
+
+def get_django_model(config, ext, file):
+    """Returns the django model data for the provided file"""
+    django_model = config.get("files_{}".format(ext), file)
+    django_origin = config.get("files_{}".format(ext), "origin_file")
+
+    return {"model": django_model, "origin": django_origin}
+
+
+def unzip_files(config):
+    """Unzips the download files"""
+    extensions = get_extensions(config)
+
+    # Sets up location to the zip files
+    root_path = get_root_path(config)
     
     # Cycle through all the extensions and save the files for the zip
     for ext in extensions:
@@ -28,7 +57,7 @@ def unzip_files(config):
         zip_file = zipfile.ZipFile(zip_path, "r")
 
         # Get the names of the data files in the zip
-        data_files = config.get("files_{}".format(ext), "files").split(",")
+        data_files = get_data_files(config, ext)
 
         # Cycle through each file name and save the file
         for file in data_files:
@@ -42,12 +71,62 @@ def unzip_files(config):
         # Close the archive
         zip_file.close()
         
+def extract_dpd_data(config):
+    """Extracts the data from the data extract files"""
+    # Sets up location to the extracted files
+    root_path = get_root_path(config)
+
+    # Get the extensions of the downloaded files
+    extensions = get_extensions(config)
+
+    # Set up the dictionary to hold the extracted data
+    dpd_data = {}
+
+    # Cycle through all the extensions to locate the .txt files
+    for ext in extensions:
+        # Add the extension to the dictionary
+        dpd_data[ext] = {}
+
+        # Get the names of the data files in the zip
+        data_files = get_data_files(config, ext)
+
+        for data_file in data_files:
+            # Set the path to the data file
+            file_name = "{}.txt".format(data_file)
+            file_path = root_path.child(file_name)
+
+            # Get the Django model associated with this file
+            django_model_data = get_django_model(config, ext, data_file)
+
+            # Add the file name to the extension dictionary
+            dpd_data[ext][data_file] = {
+                "model": django_model_data["model"],
+                "origin": django_model_data["origin"],
+                "data": []
+            }
+
+            # Open extracted file and parse it
+            with open(file_path, "r", encoding="utf8") as file:
+                log.debug("Extracting data from {}".format(file_name))
+
+                # Opens the file as a .csv
+                csv_file = csv.reader(
+                    file, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL
+                )
+
+                # Read each line and append it to the list
+                for line in csv_file:
+                    dpd_data[ext][data_file]["data"].append(line)
+
+    # Return the completed dictionary
+    return dpd_data
+
 def remove_files(config):
+    """Removes all the text files in the data extract directory"""
     log.debug("Removing data extract .txt files")
 
     # Sets up location to the extracted files
-    date = datetime.utcnow().strftime("%Y-%m-%d")
-    root_path = Path(config.get("zips", "save_loc")).child(date)
+    root_path = get_root_path(config)
 
     # Collects the text files in the directory
     text_files = root_path.listdir("*.txt")
@@ -55,112 +134,3 @@ def remove_files(config):
     # Removes all the text files
     for file in text_files:
         file.remove()
-    
-def create_extract_folders():
-    """Creates the folders for holding the extracted files"""
-    # Sets script directory to allow absolute path naming (for Cron job)
-    # Ubuntu Path
-    # root = Path("/", "home", "joshua", "scripts", "dpd_data_extraction")
-    # Windows Path
-    root = Path("E:\\", "My Documents", "GitHub", "dpd_data_extraction")
-
-    # Get the date
-    today = datetime.date.today()
-    year = today.year
-    month = "%02d" % today.month
-    day = "%02d" % today.day
-    date = "%s-%s-%s" % (year, month, day)
-
-    # Saves data extract location and creates folder if needed
-    print ("Creating dpd_data_extracts folder... ", end="")
-    extractLoc = root.child("dpd_data_extracts", date)
-
-    if not extractLoc.exists():
-        os.mkdir(extractLoc.absolute())
-    
-    print ("Complete!")
-
-    # Saves parsed extract location and creates folder if needed
-    print ("Creating parsed_data_extracts folder... ", end="")
-    parseLoc = root.child("parsed_data_extracts", date)
-
-    if not parseLoc.exists():
-        os.mkdir(parseLoc.absolute())
-
-    print ("Complete!\n")
-
-    return {"root": root, "eLoc": extractLoc, "pLoc": parseLoc}
-
-def parse_files(locs, names):
-    # Array that will collect all parsed extracts
-    parseArray = {
-        "comp": [],
-        "drug": [],
-        "form": [],
-        "ingred": [],
-        "package": [],
-        "pharm": [],
-        "route": [],
-        "schedule": [],
-        "status": [],
-        "ther": [],
-        "vet": []
-    }
-
-    # Cycles through each suffix
-    for zip in names:
-        for file in zip["files"]:
-            # File details
-            title = file.title
-            name = file.name
-            ePath = file.ePath
-
-            # Open extracted file and parse it
-            with open(ePath, "r", encoding="latin-1") as ext:
-                # Treats text file as csv and converts lines to list
-                csvFile = csv.reader(ext, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL)
-
-                # Read each line of file & output array of parsed text
-                for line in csvFile:
-                    # Parse list
-                    parseArray[title].append(parse_extract_entry(name, line))
-
-        
-        print ("")
-    
-    # Save parsed text to file
-    for key in parseArray:
-        pPath = locs["pLoc"].child("%s.txt" % key)
-
-        with open(pPath, 'w', newline="") as pFile:
-            # Create writer to convert list to text
-            csvWriter = csv.writer(pFile, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL)
-
-            # Writer all lines to file
-            print ("Saving parsed %s entries to file... " % key, end="")
-            
-            # TO FIX - NOT WRITING TO FILE, BUT IS COLLECTING DATA
-            csvWriter.writerows(parseArray[key])
-                
-            print ("Complete!")
-    
-    print ("")
-
-    # Delete the extracted text files
-    for zip in names:
-        for file in zip["files"]:
-            # File details
-            name = file.name
-            ePath = file.ePath
-
-            # Delete the specified file
-            print (("Deleting %s... " % name), end="")
-
-            os.remove(ePath)
-
-            print ("Complete!")
-
-    print ("\n")
-
-    return parseArray
-

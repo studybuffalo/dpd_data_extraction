@@ -63,6 +63,8 @@ dpd_connections.download_extracts(config)
 # Unzip the files
 extraction.unzip_files(config)
 
+# Extracts the data from the .txt files
+dpd_data = extraction.extract_dpd_data(config)
 
 # Remove all the unzipped text files
 extraction.remove_files(config)

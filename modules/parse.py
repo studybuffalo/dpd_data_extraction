@@ -1,5 +1,61 @@
 import re
 
+def create_extract_folders():
+    """Creates the folders for holding the extracted files"""
+    # Sets script directory to allow absolute path naming (for Cron job)
+    # Ubuntu Path
+    # root = Path("/", "home", "joshua", "scripts", "dpd_data_extraction")
+    # Windows Path
+    root = Path("E:\\", "My Documents", "GitHub", "dpd_data_extraction")
+
+    # Get the date
+    today = datetime.date.today()
+    year = today.year
+    month = "%02d" % today.month
+    day = "%02d" % today.day
+    date = "%s-%s-%s" % (year, month, day)
+
+    # Saves data extract location and creates folder if needed
+    print ("Creating dpd_data_extracts folder... ", end="")
+    extractLoc = root.child("dpd_data_extracts", date)
+
+    if not extractLoc.exists():
+        os.mkdir(extractLoc.absolute())
+    
+    print ("Complete!")
+
+    # Saves parsed extract location and creates folder if needed
+    print ("Creating parsed_data_extracts folder... ", end="")
+    parseLoc = root.child("parsed_data_extracts", date)
+
+    if not parseLoc.exists():
+        os.mkdir(parseLoc.absolute())
+
+    print ("Complete!\n")
+
+    return {"root": root, "eLoc": extractLoc, "pLoc": parseLoc}
+
+
+"""
+
+    # Save parsed text to file
+    for key in parseArray:
+        pPath = locs["pLoc"].child("%s.txt" % key)
+
+        with open(pPath, 'w', newline="") as pFile:
+            # Create writer to convert list to text
+            csvWriter = csv.writer(pFile, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL)
+
+            # Writer all lines to file
+            print ("Saving parsed %s entries to file... " % key, end="")
+            
+            # TO FIX - NOT WRITING TO FILE, BUT IS COLLECTING DATA
+            csvWriter.writerows(parseArray[key])
+                
+            print ("Complete!")
+    
+    print ("")
+"""
 def parse_extract_entry(file, line):
     """Takes a list of strings improves standardization & readability
     

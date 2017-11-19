@@ -188,7 +188,7 @@ def normalize_status(data):
             "drug_code": convert_integer(item[0]),
             "current_status_flag": convert_boolean(item[1], "Y"),
             "status": item[2],
-            "history_date": item[3],
+            "history_date": convert_date(item[3]),
             "status_f": item[4],
             "lot_number": item[5],
             "expiration_date": convert_date(item[6]),

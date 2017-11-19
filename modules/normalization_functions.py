@@ -1,3 +1,4 @@
+from bisect import bisect_left
 from datetime import date
 import logging
 import re
@@ -6,6 +7,26 @@ import re
 # Setup logging
 log = logging.getLogger(__name__)
 
+def binary_search(term, sub_list):
+    """Completes a binary search for term in the provided list
+        args:
+            term        a string to search for
+            sub_list    a SubList object
+        returns:
+            Match       the substituted string
+            No Match    None
+        raises:
+            None
+    """
+    
+    # Look for match
+    i = bisect_left(sub_list.original, term)
+
+    # If match found, return the corresponding object
+    if i != len(sub_list.original) and sub_list.original[i] == term:
+        return sub_list.substitution[i]
+    else:
+        return None
 
 def convert_integer(txt):
     """Converts the provided text to an integer"""
@@ -76,6 +97,24 @@ def correct_strength(txt):
     txt = correct_leading_decimal(txt)
 
     return txt
+    
+def remove_extra_white_space(txt):
+    """Removes any consecutive white space characters"""
+    return re.sub(r"\s{2,}", " ", txt)
+
+def correct_ahfs(txt, sub_data):
+    """Corrects the formatting of the AHFS description"""
+    # Check if this item is in the substitution list
+    sub = binary_search(txt, sub_data)
+
+    # If not, provide basic formatting and upload to the pending sub table
+    if sub:
+        return sub
+    else:
+        txt = remove_extra_white_space(txt)
+
+        return txt
+
 
 def parseAHFS(text):
     """Formats the AHFS category for the drug product."""

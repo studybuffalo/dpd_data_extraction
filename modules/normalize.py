@@ -2,14 +2,16 @@ import logging
 
 from .normalization_functions import (
     convert_integer, convert_boolean, convert_date, correct_din, 
-    correct_dosage, correct_strength
-
+    correct_dosage, correct_strength, correct_ahfs
 )
+from .substitution_functions import Substitutions
 
 
 # Setup logging
 log = logging.getLogger(__name__)
 
+# Setup the Substitution data
+SUB_DATA = Substitutions()
 
 def normalize_active_ingredients(data):
     """Normalizes the active ingredient entries"""
@@ -211,7 +213,7 @@ def normalize_therapeutic_class(data):
             "tc_atc_number": item[1],
             "tc_atc": item[2],
             "tc_ahfs_number": item[3],
-            "tc_ahfs": item[4],
+            "tc_ahfs": correct_ahfs(item[4], SUB_DATA.ahfs),
             "tc_atc_f": item[5],
             "tc_ahfs_f": item[6],
         })

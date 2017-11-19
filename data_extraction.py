@@ -67,6 +67,7 @@ extraction.unzip_files(config)
 dpd_data = extraction.extract_dpd_data(config)
 
 # Normalize the dpd_data for saving and upload
+normalized_data = normalize.normalize_data(dpd_data)
 
 # Upload the 
 # Remove all the unzipped text files

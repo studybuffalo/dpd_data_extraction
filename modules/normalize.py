@@ -5266,3 +5266,11 @@ def parseUPC(text):
     text = re.sub(r"\s{2,}", " ", text)
     
     return text
+
+
+def normalize_data(dpd_data):
+    """Normalizes the extracted dpd data"""
+    # TO BE DEVELOPED
+    normalized = dpd_data
+
+    return normalized

@@ -27,7 +27,7 @@ import configparser
 from django.core.wsgi import get_wsgi_application
 import logging
 import logging.config
-from modules import dpd_connections, extraction, parse, upload
+from modules import dpd_connections, extraction, normalize, upload
 import os
 import sys
 from unipath import Path
@@ -66,6 +66,9 @@ extraction.unzip_files(config)
 # Extracts the data from the .txt files
 dpd_data = extraction.extract_dpd_data(config)
 
+# Normalize the dpd_data for saving and upload
+
+# Upload the 
 # Remove all the unzipped text files
 extraction.remove_files(config)
 

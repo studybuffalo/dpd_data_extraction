@@ -1,1 +1,1 @@
-__all__ = ["dpd_connections", "extraction", "parse", "upload"]
+__all__ = ["dpd_connections", "extraction", "normalize", "upload"]

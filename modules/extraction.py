@@ -1,27 +1,61 @@
+from datetime import datetime
+import logging
+from unipath import Path
 import zipfile
-import datetime
+
 import csv
 import math
 
-class FileDetails(object):
-    title = ""
-    suffix = ""
-    locs = []
+# Setup logging
+log = logging.getLogger(__name__)
 
-    def __init__(self, title, suffix, locs):
-        # Generate file name based on suffix
-        if suffix == "":
-            name = "%s.txt" % title
-        else:
-            name = "%s_%s.txt" % (title, suffix)
+def unzip_files(config):
+    """Unzips the download files"""
+    extensions = config.get("zips", "extensions").split(",")
 
-        # Generate paths of extracted and parsed files
-        ePath = locs["eLoc"].child(name)
+    # Sets up location to the zip files
+    date = datetime.utcnow().strftime("%Y-%m-%d")
+    root_path = Path(config.get("zips", "save_loc")).child(date)
+    
+    # Cycle through all the extensions and save the files for the zip
+    for ext in extensions:
+        zip_name = config.get("zips", "save_{}".format(ext))
 
-        self.title = title
-        self.name = name
-        self.ePath = ePath
+        # Unzip the zip file
+        log.debug("Unzipping {}".format(zip_name))
+        
+        zip_path = root_path.child(zip_name)
+        zip_file = zipfile.ZipFile(zip_path, "r")
 
+        # Get the names of the data files in the zip
+        data_files = config.get("files_{}".format(ext), "files").split(",")
+
+        # Cycle through each file name and save the file
+        for file in data_files:
+            file_name = "{}.txt".format(file)
+
+            # Extract the text file from the archive
+            log.debug("Extracting {}".format(file_name))
+
+            zip_file.extract(file_name, path=root_path)
+
+        # Close the archive
+        zip_file.close()
+        
+def remove_files(config):
+    log.debug("Removing data extract .txt files")
+
+    # Sets up location to the extracted files
+    date = datetime.utcnow().strftime("%Y-%m-%d")
+    root_path = Path(config.get("zips", "save_loc")).child(date)
+
+    # Collects the text files in the directory
+    text_files = root_path.listdir("*.txt")
+
+    # Removes all the text files
+    for file in text_files:
+        file.remove()
+    
 def create_extract_folders():
     """Creates the folders for holding the extracted files"""
     # Sets script directory to allow absolute path naming (for Cron job)
@@ -56,29 +90,6 @@ def create_extract_folders():
     print ("Complete!\n")
 
     return {"root": root, "eLoc": extractLoc, "pLoc": parseLoc}
-
-def unzip_zips(locs, names):
-    # Set location to extract files to
-    eLoc = locs["eLoc"]
-
-    # Open each zip file and extract the files
-    for zip in names:
-        zipName = zip["name"]
-        zipLoc = eLoc.child(zipName).absolute()
-    
-        # Unzip the zips
-        print (("Unzipping %s... " % zipName), end="")
-        archive = zipfile.ZipFile(zipLoc, 'r')
-        
-        # Cycles through all the files and extracts the data
-        for file in zip["files"]:
-            # Extracts the text file from the archive
-            archive.extract(file.name, path=eLoc.absolute())
-        
-        archive.close()
-        print ("Completed!")
-
-    print ("\n")
 
 def parse_files(locs, names):
     # Array that will collect all parsed extracts

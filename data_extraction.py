@@ -60,6 +60,12 @@ log.info("HEALTH CANADA DRUG PRODUCT DATABASE DATA EXTRACTION TOOL STARTED")
 # Download the data extracts
 dpd_connections.download_extracts(config)
 
+# Unzip the files
+extraction.unzip_files(config)
+
+
+# Remove all the unzipped text files
+extraction.remove_files(config)
 
 """
 if permission:

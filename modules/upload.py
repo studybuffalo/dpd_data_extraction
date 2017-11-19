@@ -3,21 +3,9 @@ import logging
 import os
 
 
+
 # Setup logging
 log = logging.getLogger(__name__)
-
-# Setup Connection to Django Database and import relevant models
-os.environ.setdefault(
-    "DJANGO_SETTINGS_MODULE", config.get("django", "settings")
-)
-sys.path.append(config.get("django", "location"))
-application = get_wsgi_application
-
-from hc_cpd import (
-    DPD, ActiveIngredients, Companies, DrugProduct, Form, 
-    InactiveProducts, Packaging, PharmaceuticalStandard, Route, 
-    Schedule, Status, TherapeuticClass, VeterinarySpecies, 
-)
 
 
 def save_to_model(item, model_name, origin):
@@ -25,8 +13,13 @@ def save_to_model(item, model_name, origin):
     # Create an entry in the DPD model or retrieve the item
     dpd_entry, _ = DPD.objects.get_or_create(
         drug_code=item[0],
+    )
+
+    # Add/update the origin_file
+    dpd_entry(
         origin_file=origin
     )
+    dpd_entry.save()
 
     # Upload the data with the associated dpd_entry to the proper model
     # ActiveIngredient
@@ -80,6 +73,7 @@ def save_to_model(item, model_name, origin):
             drug_code=dpd_entry,
             product_categorization=item["product_categorization"],
             class_=item["class_"],
+            drug_identification_number=item["drug_identification_number"],
             brand_name=item["brand_name"],
             descriptor=item["descriptor"],
             pediatric_flag=item["pediatric_flag"],
@@ -190,8 +184,21 @@ def save_to_model(item, model_name, origin):
         )
         model.save()
     
-def upload_data(data):
+def upload_data(config, data):
     """Uploads normalized data to the Django database"""
+    # Setup the Django database connection
+    os.environ.setdefault(
+        "DJANGO_SETTINGS_MODULE", config.get("django", "settings")
+    )
+    sys.path.append(config.get("django", "location"))
+    application = get_wsgi_application
+    
+    from hc_cpd import (
+        DPD, ActiveIngredients, Companies, DrugProduct, Form, 
+        InactiveProducts, Packaging, PharmaceuticalStandard, Route, 
+        Schedule, Status, TherapeuticClass, VeterinarySpecies, 
+    )
+
     # Cycle through each extension
     for extension_key, extension in data.items():
         # Cycle through each data file

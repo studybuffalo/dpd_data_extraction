@@ -24,11 +24,9 @@
 """
 
 import configparser
-from django.core.wsgi import get_wsgi_application
 import logging
 import logging.config
 from modules import dpd_connections, extraction, normalize, upload
-import os
 import sys
 from unipath import Path
 
@@ -46,6 +44,7 @@ log_config = Path(root.parent, "config", "dpd_data_extraction_logging.cfg")
 logging.config.fileConfig(log_config, disable_existing_loggers=False)
 log = logging.getLogger(__name__)
 
+
 # DATA EXTRACTION PROCESS
 log.info("HEALTH CANADA DRUG PRODUCT DATABASE DATA EXTRACTION TOOL STARTED")
 
@@ -62,7 +61,7 @@ dpd_data = extraction.extract_dpd_data(config)
 normalized_data = normalize.normalize_data(dpd_data)
 
 # Upload the data to the Django database
-upload.upload_data(normalized_data)
+upload.upload_data(config, normalized_data)
 
 # Remove all the unzipped text files
 extraction.remove_files(config)

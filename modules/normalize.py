@@ -28,7 +28,8 @@ def normalize_active_ingredients(data):
             
 def normalize_companies(data):
     """Normalizes the companies entries"""
-    
+    normalized_data = []
+
     # Cycle through each entry
     for item in data:
         normalized_data.append({
@@ -56,7 +57,8 @@ def normalize_companies(data):
 
 def normalize_drug_product(data):
     """Normalizes the drug product entries"""
-    
+    normalized_data = []
+
     # Cycle through each entry
     for item in data:
         normalized_data.append({
@@ -80,7 +82,8 @@ def normalize_drug_product(data):
 
 def normalize_form(data):
     """Normalizes the form entries"""
-    
+    normalized_data = []
+
     # Cycle through each entry
     for item in data:
         normalized_data.append({
@@ -94,7 +97,8 @@ def normalize_form(data):
 
 def normalize_inactive_products(data):
     """Normalizes the inactive products entries"""
-    
+    normalized_data = []
+
     # Cycle through each entry
     for item in data:
         normalized_data.append({
@@ -108,7 +112,8 @@ def normalize_inactive_products(data):
 
 def normalize_packaging(data):
     """Normalizes the packaging entries"""
-    
+    normalized_data = []
+
     # Cycle through each entry
     for item in data:
         normalized_data.append({
@@ -126,7 +131,8 @@ def normalize_packaging(data):
 
 def normalize_pharmaceutical_standard(data):
     """Normalizes the pharmaceutical standard entries"""
-    
+    normalized_data = []
+
     # Cycle through each entry
     for item in data:
         normalized_data.append({
@@ -138,7 +144,8 @@ def normalize_pharmaceutical_standard(data):
 
 def normalize_route(data):
     """Normalizes the route entries"""
-    
+    normalized_data = []
+
     # Cycle through each entry
     for item in data:
         normalized_data.append({
@@ -152,7 +159,8 @@ def normalize_route(data):
 
 def normalize_schedule(data):
     """Normalizes the schedule entries"""
-    
+    normalized_data = []
+
     # Cycle through each entry
     for item in data:
         normalized_data.append({
@@ -165,7 +173,8 @@ def normalize_schedule(data):
 
 def normalize_status(data):
     """Normalizes the status entries"""
-    
+    normalized_data = []
+
     # Cycle through each entry
     for item in data:
         normalized_data.append({
@@ -182,7 +191,8 @@ def normalize_status(data):
 
 def normalize_therapeutic_class(data):
     """Normalizes the therapeutic class entries"""
-    
+    normalized_data = []
+
     # Cycle through each entry
     for item in data:
         normalized_data.append({
@@ -199,7 +209,8 @@ def normalize_therapeutic_class(data):
 
 def normalize_veterinary_status(data):
     """Normalizes the veterinary status entries"""
-    
+    normalized_data = []
+
     # Cycle through each entry
     for item in data:
         normalized_data.append({
@@ -266,7 +277,7 @@ def normalize_entries(data, model):
 def normalize_data(dpd_data):
     """Normalizes the extracted dpd data"""
     # Cycle through each extension
-    for extension_key, extension in data.items():
+    for extension_key, extension in dpd_data.items():
         # Cycle through each data file
         for file_key, file in extension.items():
             # Convert the data to a dictionary and normalize the entries

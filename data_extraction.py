@@ -1,8 +1,6 @@
-#!/usr/bin/env python3
+"""Uploads the Health Canada Drug Product Database to a Django database
 
-"""Uploads the Health Canada Drug Product Database to a MySQL DB
-
-    Last Update: 2017-Feb-20
+    Last Update: 2017-Nov-18
 
     Copyright (c) Notices
 	    2017	Joshua R. Torrance	<studybuffalo@studybuffalo.com>
@@ -23,39 +21,6 @@
 
     SHOULD YOU REQUIRE ANY EXCEPTIONS TO THIS LICENSE, PLEASE CONTACT 
     THE COPYRIGHT HOLDERS.
-"""
-
-"""
-    STYLE RULES FOR THIS PROGRAM
-    Style follows the Python Style Guide (PEP 8) where possible. The 
-    following are common standards for reference
-    
-    COMMENT LINES to max of 72 characters
-    PROGRAM LINES to a max of 79 characters
-    
-    INDENTATION 4 spaces
-    STRINGS use quotation marks
-
-    VARIABLES use camelCase
-    GLOBAL VARIABLES use lowercase with underscores
-    CLASSES use CapWords
-    CONSTANTS use UPPERCASE
-    FUNCTIONS use lowercase with underscores
-    MODULES use lowercase with underscores
-    
-    ALIGNMENT
-        If possible, align with open delminter
-        If not possible, indent
-        If one indent would align arguments with code in block, use 
-            two indents to provide visual differentiation
-        Operators should occur at start of line in broken up lines, 
-        not at the end of the preceding line
-
-    OPERATORS & SPACING
-    Use spacing in equations
-        e.g. 1 + 1 = 2
-    Do not use spacing in assigning arguments in functions 
-        e.g. def foo(bar=1):
 """
 
 import codecs

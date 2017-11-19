@@ -1,7 +1,9 @@
 import logging
 
 from .normalization_functions import (
-    convert_integer, convert_boolean, convert_date, correct_din
+    convert_integer, convert_boolean, convert_date, correct_din, 
+    correct_dosage, correct_strength
+
 )
 
 
@@ -20,10 +22,10 @@ def normalize_active_ingredients(data):
             "active_ingredient_code": item[1],
             "ingredient": item[2],
             "ingredient_supplied_ind": item[3],
-            "strength": item[4],
+            "strength": correct_strength(item[4]),
             "strength_unit": item[5],
             "strength_type": item[6],
-            "dosage_value": item[7],
+            "dosage_value": correct_dosage(item[7]),
             "base": convert_boolean(item[8], "Y"),
             "dosage_unit": item[9],
             "notes": item[10],

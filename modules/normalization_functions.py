@@ -55,11 +55,27 @@ def convert_date(txt):
     else:
         return None
 
+def correct_leading_decimal(txt):
+    """Adds a leading zero to a decimal if needed"""
+    return re.sub(r"^.", "0.", txt)
+
 def correct_din(txt):
     if txt.upper() == "NOT APPLICABLE/NON APPLICABLE":
         return "N/A"
     else:
         return txt
+
+def correct_dosage(txt):
+    # Correcting a missing leading zero
+    txt = correct_leading_decimal(txt)
+
+    return txt
+
+def correct_strength(txt):
+    # Correct a missing leading zero
+    txt = correct_leading_decimal(txt)
+
+    return txt
 
 def parseAHFS(text):
     """Formats the AHFS category for the drug product."""
@@ -4068,18 +4084,7 @@ def parseDescriptor(text):
     
     return text
 
-def parseDIN(text):
-    """Cleans up non-conforming DINs"""
-    
-    text = text.replace("Not Applicable/non applicable", "NA")
-    
-    return text
 
-def parseDosage(text):
-    """Formats dosages of drug products."""
-
-    text = text[:1].replace(".", "0.") + text[1:]
-    return text
 
 def parseIngredient(text):
     """Formats the ingredient for drug products."""

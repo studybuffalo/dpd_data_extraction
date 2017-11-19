@@ -24,17 +24,44 @@
 """
 
 import configparser
+from django.core.wsgi import get_wsgi_application
+import logging
+import logging.config
+from modules import dpd_connections, extraction, parse, upload
+import os
 import sys
 from unipath import Path
 
 
-print ("\nHEALTH CANADA DRUG PRODUCT DATABASE DATA EXTRACTION TOOL")
-print ("--------------------------------------------------------")
-print ("Created by Joshua Torrance, 2017-Feb-20\n\n")
+# APPLICATION SETUP
+# Setup root path
+root = Path(sys.argv[1])
 
-permission = get_permission("http://www.hc-sc.gc.ca/robots.txt")
+# Collect the config file
+config = configparser.ConfigParser()
+config.read(Path(root.parent, "config", "dpd_data_extraction.cfg"))
 
-# Downloads zip files
+# Setup Logging
+log_config = Path(root.parent, "config", "dpd_data_extraction_logging.cfg")
+logging.config.fileConfig(log_config, disable_existing_loggers=False)
+log = logging.getLogger(__name__)
+
+# Setup Connection to Django Database
+os.environ.setdefault(
+    "DJANGO_SETTINGS_MODULE", config.get("django", "settings")
+)
+sys.path.append(config.get("django", "location"))
+application = get_wsgi_application
+
+
+# DATA EXTRACTION PROCESS
+log.info("HEALTH CANADA DRUG PRODUCT DATABASE DATA EXTRACTION TOOL STARTED")
+
+# Download the data extracts
+dpd_connections.download_extracts(config)
+
+
+"""
 if permission:
     print ("CREATE APPLICATION FOLDERS AND FILE DETAILS")
     print ("----------------------------------------------")
@@ -75,3 +102,4 @@ if permission:
 
 
     print ("Health Canada Drug Product Database Extraction Tool Finished!\n")
+"""

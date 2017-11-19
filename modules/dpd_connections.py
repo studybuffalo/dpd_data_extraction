@@ -1,25 +1,42 @@
-from urllib import robotparser
-from urllib import request
+from datetime import datetime
+import logging
+import requests
+from unipath import Path
 
-def get_permission(robotFile):
-    # Get permission to access the Health Canada website
-    print ("CHECKING FOR PERMISSION TO RUN")
-    print ("------------------------------")
+# Setup logging
+log = logging.getLogger(__name__)
 
-    """Checks the specified robot.txt file for access permission."""
-    robot = robotparser.RobotFileParser()
-    robot.set_url(robotFile)
-    robot.read()
+def download_zips(session, config):
+    extensions = config.get("zips", "extensions").split(",")
     
-    print ("Checking robots.txt... ", end="")
+    # Create the save directory
+    date = datetime.utcnow().strftime("%Y-%m-%d")
+    root_path = Path(config.get("zips", "save_loc")).child(date)
+    root_path.mkdir()
+        
+    for ext in extensions:
+        # Set download and save locations
+        url = config.get("zips", "download_{}".format(ext))
+        file_name = config.get("zips", "save_{}".format(ext))
+        save = root_path.child(file_name)
 
-    can_crawl = robot.can_fetch(
-		"Study Buffalo Data Extraction (http://www.studybuffalo.com/dataextraction/)",
-		"https://idbl.ab.bluecross.ca/idbl/load.do")
-    
-    if can_crawl == True:
-        print ("Permission Granted!\n\n")
-    else:
-        print ("Permission Rejected.")
+        # Get the zip file
+        log.debug("Requesting {}".format(file_name))
+        response = session.get(url)
 
-    return can_crawl
+        # Save the zip file
+        with open(save, 'wb') as file:
+            log.debug("Saving {}".format(file_name))
+            file.write(response.content)
+        
+def download_extracts(config):
+    """Handles download of the data extract files"""
+    # Setup the session
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": config.get("robot", "user_agent"),
+        "From": config.get("robot", "from")
+    })
+
+    # Download the zip files
+    download_zips(session, config)

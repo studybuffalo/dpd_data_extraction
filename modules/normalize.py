@@ -1,4 +1,11 @@
+import logging
+
 from .normalization_functions import convert_integer, convert_boolean, convert_date
+
+
+# Setup logging
+log = logging.getLogger(__name__)
+
 
 def normalize_active_ingredients(data):
     """Normalizes the active ingredient entries"""
@@ -64,7 +71,7 @@ def normalize_drug_product(data):
         normalized_data.append({
             "drug_code": convert_integer(item[0]),
             "product_categorization": item[1],
-            "class_": item[2],
+            "class_e": item[2],
             "drug_identification_number": item[3],
             "brand_name": item[4],
             "descriptor": item[5],
@@ -224,6 +231,8 @@ def normalize_veterinary_status(data):
 
 def normalize_entries(data, model):
     """Normalizes the data based on the provided model"""
+    log.debug("Normalizing {}".format(model))
+
     normalized_data = None
 
     # ActiveIngredient
@@ -280,6 +289,8 @@ def normalize_data(dpd_data):
     """Normalizes the extracted dpd data"""
     # Cycle through each extension
     for extension_key, extension in dpd_data.items():
+        log.debug("Normalizing {} files".format(extension_key))
+
         # Cycle through each data file
         for file_key, file in extension.items():
             # Convert the data to a dictionary and normalize the entries

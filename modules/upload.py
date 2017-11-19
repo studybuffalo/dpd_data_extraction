@@ -1,6 +1,4 @@
-from django.core.wsgi import get_wsgi_application
 import logging
-import os
 
 
 
@@ -10,16 +8,24 @@ log = logging.getLogger(__name__)
 
 def save_to_model(item, model_name, origin):
     """Saves the provide item to the specified model"""
-    # Create an entry in the DPD model or retrieve the item
-    dpd_entry, _ = DPD.objects.get_or_create(
-        drug_code=item[0],
+    
+    # Import the model references
+    from hc_dpd.models import (
+        DPD, ActiveIngredients, Companies, DrugProduct, Form, 
+        InactiveProducts, Packaging, PharmaceuticalStandard, Route, 
+        Schedule, Status, TherapeuticClass, VeterinarySpecies, 
     )
 
-    # Add/update the origin_file
-    dpd_entry(
-        origin_file=origin
-    )
-    dpd_entry.save()
+    # Turn off the query logging
+    logging.getLogger("django.db.backends").setLevel(logging.CRITICAL)
+
+    # Create an entry in the DPD model or retrieve the item
+    dpd_entry, _ = DPD.objects.get_or_create(drug_code=item["drug_code"])
+
+    # Add/update the origin_file if needed
+    if dpd_entry.origin_file != origin:
+        dpd_entry.origin_file = origin
+        dpd_entry.save()
 
     # Upload the data with the associated dpd_entry to the proper model
     # ActiveIngredient
@@ -72,7 +78,7 @@ def save_to_model(item, model_name, origin):
         model = DrugProduct(
             drug_code=dpd_entry,
             product_categorization=item["product_categorization"],
-            class_=item["class_"],
+            class_e=item["class_e"],
             drug_identification_number=item["drug_identification_number"],
             brand_name=item["brand_name"],
             descriptor=item["descriptor"],
@@ -186,26 +192,19 @@ def save_to_model(item, model_name, origin):
     
 def upload_data(config, data):
     """Uploads normalized data to the Django database"""
-    # Setup the Django database connection
-    os.environ.setdefault(
-        "DJANGO_SETTINGS_MODULE", config.get("django", "settings")
-    )
-    sys.path.append(config.get("django", "location"))
-    application = get_wsgi_application
-    
-    from hc_cpd import (
-        DPD, ActiveIngredients, Companies, DrugProduct, Form, 
-        InactiveProducts, Packaging, PharmaceuticalStandard, Route, 
-        Schedule, Status, TherapeuticClass, VeterinarySpecies, 
-    )
+   
 
     # Cycle through each extension
     for extension_key, extension in data.items():
+        log.debug("Uploading {} files".format(extension_key))
+
         # Cycle through each data file
         for file_key, file in extension.items():
             # Get the model and origin data
             django_model = file["model"]
             django_origin = file["origin"]
+
+            log.debug("Uploading to the {} model".format(django_model))
 
             # Cycle through each extract item and upload it
             for item in file["data"]:

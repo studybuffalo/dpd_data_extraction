@@ -24,9 +24,11 @@
 """
 
 import configparser
+from django.core.wsgi import get_wsgi_application
 import logging
 import logging.config
 from modules import dpd_connections, extraction, normalize, upload
+import os
 import sys
 from unipath import Path
 
@@ -43,6 +45,17 @@ config.read(Path(root.parent, "config", "dpd_data_extraction.cfg"))
 log_config = Path(root.parent, "config", "dpd_data_extraction_logging.cfg")
 logging.config.fileConfig(log_config, disable_existing_loggers=False)
 log = logging.getLogger(__name__)
+
+# Require critical logging for Django and Requests logging
+logging.getLogger("requests").setLevel(logging.CRITICAL)
+logging.getLogger("environ").setLevel(logging.CRITICAL)
+
+ # Setup the Django database connection
+os.environ.setdefault(
+    "DJANGO_SETTINGS_MODULE", config.get("django", "settings")
+)
+sys.path.append(config.get("django", "location"))
+application = get_wsgi_application()
 
 
 # DATA EXTRACTION PROCESS

@@ -1,9 +1,34 @@
 from datetime import date
+import logging
 import re
+
+
+# Setup logging
+log = logging.getLogger(__name__)
+
 
 def convert_integer(txt):
     """Converts the provided text to an integer"""
-    return int(txt)
+    try:
+        return int(txt)
+    except ValueError:
+        # Attempt to handle a BOM if encoding is incorrect
+        try:
+            return int(txt[2:-1])
+        except Exception:
+            log.error(
+                "Unable to convert {} to integer".format(txt), 
+                exc_info=True
+            )
+
+            return 0
+    except Exception:
+        log.error(
+            "Unable to convert {} to integer".format(txt), 
+            exc_info=True
+        )
+
+        return 0
 
 def convert_boolean(txt, yes):
     """Converts provided text to boolean, based on the yes value"""
@@ -15,18 +40,17 @@ def convert_boolean(txt, yes):
 def convert_date(txt):
     """Converts the provided text to a date object"""
     months = {
-        "JAN": "01", "FEB": "02", "MAR": "03", "APR": "04", "MAY": "05", 
-        "JUN": "06", "JUL": "07", "AUG": "08", "SEP": "09", "OCT": "10",
-        "NOV": "11", "DEC": "12"
+        "JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6, 
+        "JUL": 7, "AUG": 8, "SEP": 9, "OCT": 10, "NOV": 11, "DEC": 12
     }
 
     if re.search(r"^\d{2}-[a-zA-Z]{3}-\d{4}$", txt):
         parts = txt.split("-")
 
-        day = parts[0]
+        day = int(parts[0])
         month = months[parts[1]]
-        year = parts[2]
-    
+        year = int(parts[2])
+        
         return date(year, month, day)
     else:
         return None

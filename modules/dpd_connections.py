@@ -31,12 +31,15 @@ def download_zips(session, config):
         
 def download_extracts(config):
     """Handles download of the data extract files"""
-    # Setup the session
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": config.get("robot", "user_agent"),
-        "From": config.get("robot", "from")
-    })
+    if config.getboolean("debug", "download"):
+        # Setup the session
+        session = requests.Session()
+        session.headers.update({
+            "User-Agent": config.get("robot", "user_agent"),
+            "From": config.get("robot", "from")
+        })
 
-    # Download the zip files
-    download_zips(session, config)
+        # Download the zip files
+        download_zips(session, config)
+    else:
+        log.debug("Debug mode - skip downloading zip files")

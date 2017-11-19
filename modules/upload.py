@@ -1,7 +1,6 @@
 import logging
 
 
-
 # Setup logging
 log = logging.getLogger(__name__)
 
@@ -229,7 +228,6 @@ def save_to_model(item, model_name, origin):
 def upload_data(config, data):
     """Uploads normalized data to the Django database"""
    
-
     # Cycle through each extension
     for extension_key, extension in data.items():
         log.debug("Uploading {} files".format(extension_key))

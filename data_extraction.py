@@ -27,7 +27,6 @@ import configparser
 from django.core.wsgi import get_wsgi_application
 import logging
 import logging.config
-from modules import dpd_connections, extraction, normalize, upload
 import os
 import sys
 from unipath import Path
@@ -57,6 +56,11 @@ os.environ.setdefault(
 sys.path.append(config.get("django", "location"))
 application = get_wsgi_application()
 
+# Import program modules once Django is loaded
+from modules import (
+    dpd_connections, extraction, normalize, upload, substitution_functions
+)
+
 
 # DATA EXTRACTION PROCESS
 log.info("HEALTH CANADA DRUG PRODUCT DATABASE DATA EXTRACTION TOOL STARTED")
@@ -69,7 +73,7 @@ extraction.unzip_files(config)
 
 # Extracts the data from the .txt files
 dpd_data = extraction.extract_dpd_data(config)
-
+substitution_functions.Substitutions()
 # Normalize the dpd_data for saving and upload
 normalized_data = normalize.normalize_data(dpd_data)
 

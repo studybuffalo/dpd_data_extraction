@@ -1,7 +1,13 @@
-# Setup a module-wide object containing the substitution data
+import logging
+
 from hc_dpd.models import (
     SubAHFS
 )
+
+
+# Setup logging
+log = logging.getLogger(__name__)
+
 
 class SubList(object):
     """An object of lists of original text and index-matched subs"""
@@ -14,7 +20,7 @@ def generate_sub_list(model):
     original = []
     substitution = []
 
-    for item in model.objects.all.order_by("original"):
+    for item in model.objects.all().order_by("original"):
         original.append(item.original)
         substitution.append(item.substitution)
 

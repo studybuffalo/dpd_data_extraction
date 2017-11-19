@@ -109,6 +109,7 @@ def correct_ahfs(txt, sub_data):
 
     # If not, provide basic formatting and upload to the pending sub table
     if sub:
+        log.debug(sub)
         return sub
     else:
         txt = remove_extra_white_space(txt)

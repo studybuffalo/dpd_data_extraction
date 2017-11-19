@@ -46,14 +46,6 @@ log_config = Path(root.parent, "config", "dpd_data_extraction_logging.cfg")
 logging.config.fileConfig(log_config, disable_existing_loggers=False)
 log = logging.getLogger(__name__)
 
-# Setup Connection to Django Database
-os.environ.setdefault(
-    "DJANGO_SETTINGS_MODULE", config.get("django", "settings")
-)
-sys.path.append(config.get("django", "location"))
-application = get_wsgi_application
-
-
 # DATA EXTRACTION PROCESS
 log.info("HEALTH CANADA DRUG PRODUCT DATABASE DATA EXTRACTION TOOL STARTED")
 
@@ -69,7 +61,9 @@ dpd_data = extraction.extract_dpd_data(config)
 # Normalize the dpd_data for saving and upload
 normalized_data = normalize.normalize_data(dpd_data)
 
-# Upload the 
+# Upload the data to the Django database
+upload.upload_data(normalized_data)
+
 # Remove all the unzipped text files
 extraction.remove_files(config)
 

@@ -47,7 +47,10 @@ def save_to_model(item, model_name, origin):
             strength_type_f=item["strength_type_f"],
             dosage_unit_f=item["dosage_unit_f"],
         )
-        model.save()
+        try:
+            model.save()
+        except Exception:
+            log.warn("Unable to save entry: {}".format(item), exc_info=True)
 
     # Companies
     elif model_name == "Companies":
@@ -71,7 +74,10 @@ def save_to_model(item, model_name, origin):
             province_f=item["province_f"],
             country_f=item["country_f"],
         )
-        model.save()
+        try:
+            model.save()
+        except Exception:
+            log.warn("Unable to save entry: {}".format(item), exc_info=True)
 
     # DrugProduct
     elif model_name == "DrugProduct":
@@ -101,7 +107,10 @@ def save_to_model(item, model_name, origin):
             pharmaceutical_form=item["pharmaceutical_form"],
             pharmaceutical_form_f=item["pharmaceutical_form_f"],
         )
-        model.save()
+        try:
+            model.save()
+        except Exception:
+            log.warn("Unable to save entry: {}".format(item), exc_info=True)
         
     # InactiveProducts
     elif model_name == "InactiveProducts":
@@ -111,7 +120,10 @@ def save_to_model(item, model_name, origin):
             brand_name=item["brand_name"],
             history_date=item["history_date"],
         )
-        model.save()
+        try:
+            model.save()
+        except Exception:
+            log.warn("Unable to save entry: {}".format(item), exc_info=True)
 
     # Packaging
     elif model_name == "Packaging":
@@ -125,7 +137,10 @@ def save_to_model(item, model_name, origin):
             package_size_unit_f=item["package_size_unit_f"],
             package_type_f=item["package_type_f"],
         )
-        model.save()
+        try:
+            model.save()
+        except Exception:
+            log.warn("Unable to save entry: {}".format(item), exc_info=True)
 
     # PharmaceuticalStandard
     elif model_name == "PharmaceuticalStandard":
@@ -133,7 +148,10 @@ def save_to_model(item, model_name, origin):
             drug_code=dpd_entry,
             pharmaceutical_std=item["pharmaceutical_std"],
         )
-        model.save()
+        try:
+            model.save()
+        except Exception:
+            log.warn("Unable to save entry: {}".format(item), exc_info=True)
 
     # Route
     elif model_name == "Route":
@@ -143,7 +161,10 @@ def save_to_model(item, model_name, origin):
             route_of_administration=item["route_of_administration"],
             route_of_administration_f=item["route_of_administration_f"],
         )
-        model.save()
+        try:
+            model.save()
+        except Exception:
+            log.warn("Unable to save entry: {}".format(item), exc_info=True)
 
     # Schedule
     elif model_name == "Schedule":
@@ -152,7 +173,10 @@ def save_to_model(item, model_name, origin):
             schedule=item["schedule"],
             schedule_f=item["schedule_f"],
         )
-        model.save()
+        try:
+            model.save()
+        except Exception:
+            log.warn("Unable to save entry: {}".format(item), exc_info=True)
 
     # Status
     elif model_name == "Status":
@@ -165,7 +189,10 @@ def save_to_model(item, model_name, origin):
             lot_number=item["lot_number"],
             expiration_date=item["expiration_date"],
         )
-        model.save()
+        try:
+            model.save()
+        except Exception:
+            log.warn("Unable to save entry: {}".format(item), exc_info=True)
 
     # TherapeuticClass
     elif model_name == "TherapeuticClass":
@@ -178,7 +205,10 @@ def save_to_model(item, model_name, origin):
             tc_atc_f=item["tc_atc_f"],
             tc_ahfs_f=item["tc_ahfs_f"],
         )
-        model.save()
+        try:
+            model.save()
+        except Exception:
+            log.warn("Unable to save entry: {}".format(item), exc_info=True)
 
     # VeterinarySpecies
     elif model_name == "VeterinarySpecies":
@@ -188,7 +218,10 @@ def save_to_model(item, model_name, origin):
             vet_sub_species=item["vet_sub_species"],
             vet_species_f=item["vet_species_f"],
         )
-        model.save()
+        try:
+            model.save()
+        except Exception:
+            log.warn("Unable to save entry: {}".format(item), exc_info=True)
     
 def upload_data(config, data):
     """Uploads normalized data to the Django database"""

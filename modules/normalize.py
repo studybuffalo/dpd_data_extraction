@@ -205,7 +205,7 @@ def normalize_status(data):
 def normalize_therapeutic_class(data):
     """Normalizes the therapeutic class entries"""
     normalized_data = []
-
+    
     # Cycle through each entry
     for item in data:
         normalized_data.append({

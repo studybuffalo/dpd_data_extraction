@@ -2,9 +2,10 @@ from bisect import bisect_left
 from datetime import date
 import logging
 import re
+from titlecase import titlecase
 
 from hc_dpd.models import (
-    SubAHFSPend
+    SubAHFS, SubAHFSPend
 )
 
 # Setup logging
@@ -24,7 +25,7 @@ def binary_search(term, sub_list):
     
     # Look for match
     i = bisect_left(sub_list.original, term)
-
+    
     # If match found, return the corresponding object
     if i != len(sub_list.original) and sub_list.original[i] == term:
         return sub_list.substitution[i]
@@ -129,9 +130,9 @@ def correct_ahfs(txt, sub_data):
         return sub
     else:
         # Perform basic processing
-        sub = txt.title()
-        sub = remove_extra_white_space(sub)
-
+        sub = remove_extra_white_space(txt)
+        sub = titlecase(sub)
+        
         # Upload the to the pending sub model
         upload_pend(txt, sub, SubAHFSPend)
 

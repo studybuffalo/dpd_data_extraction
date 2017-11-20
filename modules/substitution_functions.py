@@ -2,7 +2,9 @@ import logging
 from bisect import bisect_left
 
 from hc_dpd.models import (
-    SubAHFS
+    SubAHFS, SubBrand, SubCompanyName, SubDescriptor, SubIngredient, 
+    SubProductCategorization, SubRouteOfAdministration, 
+    SubPharmaceuticalStd, SubStreetName, SubSuiteNumber, SubUnit
 )
 
 
@@ -47,3 +49,13 @@ def generate_sub_list(model):
 class Substitutions(object):
     def __init__(self):
         self.ahfs = generate_sub_list(SubAHFS)
+        self.brand_name = generate_sub_list(SubBrand)
+        self.company_name = generate_sub_list(SubCompanyName)
+        self.descriptor = generate_sub_list(SubDescriptor)
+        self.ingredient = generate_sub_list(SubIngredient)
+        self.product_categorization = generate_sub_list(SubProductCategorization)
+        self.route_of_administration = generate_sub_list(SubRouteOfAdministration)
+        self.pharmaceutical_std = generate_sub_list(SubPharmaceuticalStd)
+        self.street_name = generate_sub_list(SubStreetName)
+        self.suite_number = generate_sub_list(SubSuiteNumber)
+        self.unit = generate_sub_list(SubUnit)

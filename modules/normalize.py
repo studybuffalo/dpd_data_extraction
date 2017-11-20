@@ -1,8 +1,12 @@
 import logging
 
 from .normalization_functions import (
-    convert_integer, convert_boolean, convert_date, correct_din, 
-    correct_dosage, correct_strength, correct_ahfs
+    convert_integer, convert_boolean, convert_date, correct_ahfs,
+    correct_brand_name, correct_company_name, correct_company_type,
+    correct_dosage, correct_descriptor, correct_din, correct_ingredient,
+    correct_pharmaceutical_std, correct_product_categorization,
+    correct_route_of_administration, correct_street_name, correct_strength,
+    correct_suite_number, correct_unit, correct_upc
 )
 from .substitution_functions import Substitutions
 
@@ -22,14 +26,14 @@ def normalize_active_ingredients(data):
         normalized_data.append({
             "drug_code": convert_integer(item[0]),
             "active_ingredient_code": item[1],
-            "ingredient": item[2],
+            "ingredient": correct_ingredient(item[2], SUB_DATA.ingredient),
             "ingredient_supplied_ind": item[3],
             "strength": correct_strength(item[4]),
-            "strength_unit": item[5],
+            "strength_unit": correct_unit(item[5], SUB_DATA.unit),
             "strength_type": item[6],
             "dosage_value": correct_dosage(item[7]),
             "base": convert_boolean(item[8], "Y"),
-            "dosage_unit": item[9],
+            "dosage_unit": correct_unit(item[9], SUB_DATA.unit),
             "notes": item[10],
             "ingredient_f": item[11],
             "strength_unit_f": item[12],
@@ -49,14 +53,14 @@ def normalize_companies(data):
             "drug_code": convert_integer(item[0]),
             "mfr_code": item[1],
             "company_code": convert_integer(item[2]),
-            "company_name": item[3],
-            "company_type": item[4],
+            "company_name": correct_company_name(item[3], SUB_DATA.company_name),
+            "company_type": correct_company_type(item[4]),
             "address_mailing_flag": convert_boolean(item[5], "Y"),
             "address_billing_flag": convert_boolean(item[6], "Y"),
             "address_notification_flag": convert_boolean(item[7], "Y"),
             "address_other": convert_boolean(item[8], "Y"),
-            "suite_number": item[9],
-            "street_name": item[10],
+            "suite_number": correct_suite_number(item[9], SUB_DATA.suite_number),
+            "street_name": correct_street_name(item[10], SUB_DATA.street_name),
             "city_name": item[11],
             "province": item[12],
             "country": item[13],
@@ -79,8 +83,8 @@ def normalize_drug_product(data):
             "product_categorization": item[1],
             "class_e": item[2],
             "drug_identification_number": correct_din(item[3]),
-            "brand_name": item[4],
-            "descriptor": item[5],
+            "brand_name": correct_brand_name(item[4], SUB_DATA.brand_name),
+            "descriptor": correct_descriptor(item[5], SUB_DATA.descriptor),
             "pediatric_flag": convert_boolean(item[6], "Y"),
             "accession_number": item[7],
             "number_of_ais": item[8],
@@ -117,7 +121,7 @@ def normalize_inactive_products(data):
         normalized_data.append({
             "drug_code": convert_integer(item[0]),
             "drug_identification_number": correct_din(item[1]),
-            "brand_name": item[2],
+            "brand_name": correct_brand_name(item[2], SUB_DATA.brand_name),
             "history_date": convert_date(item[3]),
         })
     
@@ -131,8 +135,8 @@ def normalize_packaging(data):
     for item in data:
         normalized_data.append({
             "drug_code": convert_integer(item[0]),
-            "upc": item[1],
-            "package_size_unit": item[2],
+            "upc": correct_upc(item[1]),
+            "package_size_unit": correct_unit(item[2], SUB_DATA.unit),
             "package_type": item[3],
             "package_size": item[4],
             "product_information": item[5],
@@ -150,7 +154,9 @@ def normalize_pharmaceutical_standard(data):
     for item in data:
         normalized_data.append({
             "drug_code": convert_integer(item[0]),
-            "pharmaceutical_std": item[1],
+            "pharmaceutical_std": correct_pharmaceutical_std(
+                item[1], SUB_DATA.pharmaceutical_std
+            ),
         })
     
     return normalized_data
@@ -164,7 +170,9 @@ def normalize_route(data):
         normalized_data.append({
             "drug_code": convert_integer(item[0]),
             "route_of_administration_code": convert_integer(item[1]),
-            "route_of_administration": item[2],
+            "route_of_administration": correct_route_of_administration(
+                item[2], SUB_DATA.route_of_administration
+            ),
             "route_of_administration_f": item[3],
         })
     

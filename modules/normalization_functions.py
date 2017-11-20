@@ -3,6 +3,9 @@ from datetime import date
 import logging
 import re
 
+from hc_dpd.models import (
+    SubAHFSPend
+)
 
 # Setup logging
 log = logging.getLogger(__name__)
@@ -27,6 +30,20 @@ def binary_search(term, sub_list):
         return sub_list.substitution[i]
     else:
         return None
+
+
+def upload_pend(original, substitution, model):
+    # Add the sub if not already there
+    pend, created = model.objects.get_or_create(
+        original=original
+    )
+
+    # If a new entry was created, add the substitution
+    if created:
+        pend.substitution = substitution
+        pend.save()
+    
+        
 
 def convert_integer(txt):
     """Converts the provided text to an integer"""
@@ -111,10 +128,14 @@ def correct_ahfs(txt, sub_data):
         # Returns sub if present
         return sub
     else:
-        # Does basic processing and uploads a pending sub
-        txt = txt.title()
+        # Perform basic processing
+        sub = txt.title()
+        sub = remove_extra_white_space(sub)
 
-        return txt
+        # Upload the to the pending sub model
+        upload_pend(txt, sub, SubAHFSPend)
+
+        return sub
 
 
 

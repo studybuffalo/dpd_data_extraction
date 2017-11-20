@@ -184,7 +184,7 @@ def correct_descriptor(txt, sub_data):
     else:
         # Perform basic processing
         sub = remove_extra_white_space(txt)
-        sub = titlecase(sub)
+        sub = sub.lower()
         
         # Upload the to the pending sub model
         upload_pend(txt, sub, SubDescriptorPend)

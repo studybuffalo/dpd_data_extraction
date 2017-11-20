@@ -107,51 +107,16 @@ def correct_ahfs(txt, sub_data):
     # Check if this item is in the substitution list
     sub = binary_search(txt, sub_data)
 
-    # If not, provide basic formatting and upload to the pending sub table
     if sub:
-        log.debug(sub)
+        # Returns sub if present
         return sub
     else:
-        txt = remove_extra_white_space(txt)
+        # Does basic processing and uploads a pending sub
+        txt = txt.title()
 
         return txt
 
 
-def parseAHFS(text):
-    """Formats the AHFS category for the drug product."""
-
-    text = text.title()
-    
-    #Removes extra space characters
-    text = re.sub(r"\s{2,}", " ", text)
-    
-    #Regex Replacements            text = re.sub(r"\b\b", "", text)
-    text = re.sub(r"\bAlfa\b", "Alpha", text)
-    text = re.sub(r"\bAntiarrythmics\b", "Antiarrhythmics", text)
-    text = re.sub(r"\bAntiimflammatory\b", "Antiinflammatory", text)
-    text = re.sub(r"\bCns\b", "CNS", text)
-    text = re.sub(r"\bComt\b", "COMT", text)
-    text = re.sub(r"\bEent\b", "EENT", text)
-    text = re.sub(r"\bFribic\b", "Fibric", text)
-    text = re.sub(r"\bGaba\b", "GABA", text)
-    text = re.sub(r"\bGi\b", "GI", text)
-    text = re.sub(r"\bHcv\b", "HCV", text)
-    text = re.sub(r"\bHiv\b", "HIV", text)
-    text = re.sub(r"\bHmg-Coa\b", "HMG-CoA", text)
-    text = re.sub(r"\bHt3\b", "HT3", text)
-    text = re.sub(r"\bIi\b", "II", text)
-    text = re.sub(r"\bIii\b", "III", text)
-    text = re.sub(r"\bIv\b", "IV", text)
-    text = re.sub(r"\bNonergot-Derivative\b", "Non-Ergot Derivative", text)
-    text = re.sub(r"\bSglt2\b", "SGLT2", text)
-    
-    #String Replacements        text = text.replace("", "")
-    
-    
-    #Removes extra space characters
-    text = re.sub(r"\s{2,}", " ", text)
-    
-    return text
 
 def parseBrand(text):
     """Formats drug product brand name."""

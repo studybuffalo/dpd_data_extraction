@@ -54,7 +54,11 @@ def remove_extra_white_space(txt):
    
 def correct_leading_decimal(txt):
     """Adds a leading zero to a decimal if needed"""
-    return re.sub(r"^.", "0.", txt)
+    # TO FIX: regex is incorrect and grabing the first character 
+    # of every string
+    #return re.sub(r"^.", "0.", txt)
+
+    return txt
   
 
 # MORE FIELD SPECIFIC CORRECTIONS/CONVERSIONS

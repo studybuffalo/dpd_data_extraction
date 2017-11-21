@@ -80,7 +80,9 @@ def normalize_drug_product(data):
     for item in data:
         normalized_data.append({
             "drug_code": convert_integer(item[0]),
-            "product_categorization": item[1],
+            "product_categorization": correct_product_categorization(
+                item[1], SUB_DATA.product_categorization
+            ),
             "class_e": item[2],
             "drug_identification_number": correct_din(item[3]),
             "brand_name": correct_brand_name(item[4], SUB_DATA.brand_name),

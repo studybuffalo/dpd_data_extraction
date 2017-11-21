@@ -226,7 +226,6 @@ def correct_pharmaceutical_std(txt, sub_data):
     else:
         # Perform basic processing
         sub = remove_extra_white_space(txt)
-        sub = titlecase(sub)
         
         # Upload the to the pending sub model
         upload_pend(txt, sub, SubPharmaceuticalStdPend)

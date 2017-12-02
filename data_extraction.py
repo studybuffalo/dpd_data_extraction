@@ -74,54 +74,14 @@ extraction.unzip_files(config)
 # Extracts the data from the .txt files
 dpd_data = extraction.extract_dpd_data(config)
 substitution_functions.Substitutions()
+
 # Normalize the dpd_data for saving and upload
 normalized_data = normalize.normalize_data(dpd_data)
+
+# TO FIX: need to remove old database entries before upload
 
 # Upload the data to the Django database
 upload.upload_data(config, normalized_data)
 
 # Remove all the unzipped text files
 extraction.remove_files(config)
-
-"""
-if permission:
-    print ("CREATE APPLICATION FOLDERS AND FILE DETAILS")
-    print ("----------------------------------------------")
-
-    # Create the extract folders and save the paths
-    locs = create_extract_folders()
-
-    # Create a list of all file names, locations, and other details
-    names = get_file_names(locs)
-
-
-    # Download the zip files from the website
-    print ("DOWNLOADING DATA EXTRACTIONS ZIP FILES")
-    print ("--------------------------------------")
-
-    download_zips(locs, names)
-
-
-    # Extract the data extracts from the zip files
-    print ("UNZIPPING FILES")
-    print ("-------------------------------")
-
-    unzip_zips(locs, names)
-
-
-    # Parse the data extracts and return the data
-    print ("PARSING FILES")
-    print ("-------------")
-
-    parsedData = parse_files(locs, names)
-
-
-    # Upload the parsed files to the database
-    print ("UPLOADING PARSED DATA")
-    print ("---------------------")
-
-    upload_data(locs, parsedData)
-
-
-    print ("Health Canada Drug Product Database Extraction Tool Finished!\n")
-"""

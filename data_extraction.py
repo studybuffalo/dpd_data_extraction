@@ -78,7 +78,8 @@ substitution_functions.Substitutions()
 # Normalize the dpd_data for saving and upload
 normalized_data = normalize.normalize_data(dpd_data)
 
-# TO FIX: need to remove old database entries before upload
+# Remove all the previous entries from the database
+upload.remove_old_data()
 
 # Upload the data to the Django database
 upload.upload_data(config, normalized_data)

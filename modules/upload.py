@@ -5,6 +5,32 @@ import logging
 log = logging.getLogger(__name__)
 
 
+def remove_old_data():
+    """Removes all the previous database data"""
+    # Import the model references
+    from hc_dpd.models import (
+        DPD, ActiveIngredients, Companies, DrugProduct, Form, 
+        InactiveProducts, Packaging, PharmaceuticalStandard, Route, 
+        Schedule, Status, TherapeuticClass, VeterinarySpecies, 
+    )
+
+    log.info("Deleting old database entries")
+
+    # Delete all the previous data
+    DPD.objects.all().delete()
+    ActiveIngredients.objects.all().delete()
+    Companies.objects.all().delete()
+    DrugProduct.objects.all().delete()
+    Form.objects.all().delete()
+    InactiveProducts.objects.all().delete()
+    Packaging.objects.all().delete()
+    PharmaceuticalStandard.objects.all().delete()
+    Route.objects.all().delete()
+    Schedule.objects.all().delete()
+    Status.objects.all().delete()
+    TherapeuticClass.objects.all().delete()
+    VeterinarySpecies.objects.all().delete()
+
 def save_to_model(item, model_name, origin):
     """Saves the provide item to the specified model"""
     

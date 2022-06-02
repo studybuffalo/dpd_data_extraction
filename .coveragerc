@@ -1,0 +1,12 @@
+[run]
+data_file = reports/.coverage
+include = *
+omit =
+    */__init__.py
+    test/conftest.py
+
+[html]
+directory = reports/htmlcov
+
+[xml]
+output = reports/coverage.xml

@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+sentry-sdk = "*"  # https://github.com/getsentry/sentry-python
 
 
 [dev-packages]

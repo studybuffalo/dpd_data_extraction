@@ -1,4 +1,3 @@
-# __all__ = [
-#     'dpd_connections', 'extraction', 'normalization_functions', 'normalize',
-#     'upload', 'substitution_functions',
-# ]
+"""Package containing all modules to run the extractions cript."""
+from config import Config
+from logging import initiate_logging

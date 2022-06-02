@@ -22,49 +22,23 @@
     SHOULD YOU REQUIRE ANY EXCEPTIONS TO THIS LICENSE, PLEASE CONTACT
     THE COPYRIGHT HOLDERS.
 """
+import pathlib
+import sys
 
-# import configparser
-# # Switch logging to Sentry
-# import logging
-# import logging.config
-# import os
-# import sys
-# # Switch to pathlib
-# from unipath import Path
+from modules import Config, initiate_logging
 
+# APPLICATION SETUP
+# Setup root path
+root = pathlib.Path(sys.argv[1])
 
-# # APPLICATION SETUP
-# # Setup root path
-# root = Path(sys.argv[1])
+# Setup config deatils
+config = Config(root)
 
-# # Collect the config file
-# config = configparser.ConfigParser()
-# config.read(Path(root.parent, 'config', 'dpd_data_extraction.cfg'))
+# Setup Logging
+log = initiate_logging(config)
 
-# # Setup Logging
-# log_config = Path(root.parent, 'config', 'dpd_data_extraction_logging.cfg')
-# logging.config.fileConfig(log_config, disable_existing_loggers=False)
-# log = logging.getLogger(__name__)
-
-# # Require critical logging for Django and Requests logging
-# logging.getLogger('requests').setLevel(logging.CRITICAL)
-# logging.getLogger('environ').setLevel(logging.CRITICAL)
-
-#  # Setup the Django database connection
-# os.environ.setdefault(
-#     'DJANGO_SETTINGS_MODULE', config.get('django', 'settings')
-# )
-# sys.path.append(config.get('django', 'location'))
-# application = get_wsgi_application()
-
-# # Import program modules once Django is loaded
-# from modules import (
-#     dpd_connections, extraction, normalize, upload, substitution_functions
-# )
-
-
-# # DATA EXTRACTION PROCESS
-# log.info('HEALTH CANADA DRUG PRODUCT DATABASE DATA EXTRACTION TOOL STARTED')
+# DATA EXTRACTION PROCESS
+log.info('HEALTH CANADA DRUG PRODUCT DATABASE DATA EXTRACTION TOOL STARTED')
 
 # # Download the data extracts
 # dpd_connections.download_extracts(config)

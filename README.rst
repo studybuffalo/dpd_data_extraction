@@ -30,10 +30,10 @@ To run tests::
 To generate coverage report::
 
   # XML Report
-  $ pipenv run pytest --cov study_buffalo --cov-report xml
+  $ pipenv run pytest --cov test --cov-report xml
 
   # HTML Report
-  $ pipenv run pytest --cov study_buffalo --cov-report html
+  $ pipenv run pytest --cov test --cov-report html
 
 ---------------
 Running Linters
@@ -42,10 +42,10 @@ Running Linters
 To run linting::
 
   # Run Pylint
-  $ pipenv run pylint study_buffalo/ config/
+  $ pipenv run pylint **/**.py
 
   # Run Pycodestyle
-  $ pipenv run pycodestyle study_buffalo/ config/
+  $ pipenv run pycodestyle **/**.py
 
 -------------------
 Documentation Style

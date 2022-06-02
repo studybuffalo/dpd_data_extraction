@@ -1,136 +1,137 @@
-from datetime import datetime
-import logging
-from unipath import Path
-import zipfile
+"""Manages extraction of DPD data from extract files."""
+# from datetime import datetime
+# import logging
+# from unipath import Path
+# import zipfile
 
-import csv
-import math
+# import csv
+# import math
 
-# Setup logging
-log = logging.getLogger(__name__)
+# # Setup logging
+# log = logging.getLogger(__name__)
 
-def get_extensions(config):
-    """Returns a list of extensions"""
-    # Get the extension list
-    extensions = config.get("zips", "extensions").split(",")
+# def get_extensions(config):
+#     """Returns a list of extensions"""
+#     # Get the extension list
+#     extensions = config.get("zips", "extensions").split(",")
 
-    # Trim any white space (incase the comma was followed by a space)
-    return [e.strip() for e in extensions]
+#     # Trim any white space (incase the comma was followed by a space)
+#     return [e.strip() for e in extensions]
 
-def get_root_path(config):
-    """Constructs a path to the directory containg the data extracts"""
-    date = datetime.utcnow().strftime("%Y-%m-%d")
-    root_path = Path(config.get("zips", "save_loc")).child(date)
+# def get_root_path(config):
+#     """Constructs a path to the directory containg the data extracts"""
+#     date = datetime.utcnow().strftime("%Y-%m-%d")
+#     root_path = Path(config.get("zips", "save_loc")).child(date)
 
-    return root_path
+#     return root_path
 
-def get_data_files(config, ext):
-    """Returns a list of file names for the provided extension"""
-    data_files = config.get("files_{}".format(ext), "files").split(",")
-    
-    # Trim any white space (incase the comma was followed by a space)
-    return [f.strip() for f in data_files]
+# def get_data_files(config, ext):
+#     """Returns a list of file names for the provided extension"""
+#     data_files = config.get("files_{}".format(ext), "files").split(",")
 
-def get_django_model(config, ext, file):
-    """Returns the django model data for the provided file"""
-    django_model = config.get("files_{}".format(ext), file)
-    django_origin = config.get("files_{}".format(ext), "origin_file")
+#     # Trim any white space (incase the comma was followed by a space)
+#     return [f.strip() for f in data_files]
 
-    return {"model": django_model, "origin": django_origin}
+# def get_django_model(config, ext, file):
+#     """Returns the django model data for the provided file"""
+#     django_model = config.get("files_{}".format(ext), file)
+#     django_origin = config.get("files_{}".format(ext), "origin_file")
+
+#     return {"model": django_model, "origin": django_origin}
 
 
-def unzip_files(config):
-    """Unzips the download files"""
-    extensions = get_extensions(config)
+# def unzip_files(config):
+#     """Unzips the download files"""
+#     extensions = get_extensions(config)
 
-    # Sets up location to the zip files
-    root_path = get_root_path(config)
-    
-    # Cycle through all the extensions and save the files for the zip
-    for ext in extensions:
-        zip_name = config.get("zips", "save_{}".format(ext))
+#     # Sets up location to the zip files
+#     root_path = get_root_path(config)
 
-        # Unzip the zip file
-        log.debug("Unzipping {}".format(zip_name))
-        
-        zip_path = root_path.child(zip_name)
-        zip_file = zipfile.ZipFile(zip_path, "r")
+#     # Cycle through all the extensions and save the files for the zip
+#     for ext in extensions:
+#         zip_name = config.get("zips", "save_{}".format(ext))
 
-        # Get the names of the data files in the zip
-        data_files = get_data_files(config, ext)
+#         # Unzip the zip file
+#         log.debug("Unzipping {}".format(zip_name))
 
-        # Cycle through each file name and save the file
-        for file in data_files:
-            file_name = "{}.txt".format(file)
+#         zip_path = root_path.child(zip_name)
+#         zip_file = zipfile.ZipFile(zip_path, "r")
 
-            # Extract the text file from the archive
-            log.debug("Extracting {}".format(file_name))
+#         # Get the names of the data files in the zip
+#         data_files = get_data_files(config, ext)
 
-            zip_file.extract(file_name, path=root_path)
+#         # Cycle through each file name and save the file
+#         for file in data_files:
+#             file_name = "{}.txt".format(file)
 
-        # Close the archive
-        zip_file.close()
-        
-def extract_dpd_data(config):
-    """Extracts the data from the data extract files"""
-    # Sets up location to the extracted files
-    root_path = get_root_path(config)
+#             # Extract the text file from the archive
+#             log.debug("Extracting {}".format(file_name))
 
-    # Get the extensions of the downloaded files
-    extensions = get_extensions(config)
+#             zip_file.extract(file_name, path=root_path)
 
-    # Set up the dictionary to hold the extracted data
-    dpd_data = {}
+#         # Close the archive
+#         zip_file.close()
 
-    # Cycle through all the extensions to locate the .txt files
-    for ext in extensions:
-        # Add the extension to the dictionary
-        dpd_data[ext] = {}
+# def extract_dpd_data(config):
+#     """Extracts the data from the data extract files"""
+#     # Sets up location to the extracted files
+#     root_path = get_root_path(config)
 
-        # Get the names of the data files in the zip
-        data_files = get_data_files(config, ext)
+#     # Get the extensions of the downloaded files
+#     extensions = get_extensions(config)
 
-        for data_file in data_files:
-            # Set the path to the data file
-            file_name = "{}.txt".format(data_file)
-            file_path = root_path.child(file_name)
+#     # Set up the dictionary to hold the extracted data
+#     dpd_data = {}
 
-            # Get the Django model associated with this file
-            django_model_data = get_django_model(config, ext, data_file)
+#     # Cycle through all the extensions to locate the .txt files
+#     for ext in extensions:
+#         # Add the extension to the dictionary
+#         dpd_data[ext] = {}
 
-            # Add the file name to the extension dictionary
-            dpd_data[ext][data_file] = {
-                "model": django_model_data["model"],
-                "origin": django_model_data["origin"],
-                "data": []
-            }
+#         # Get the names of the data files in the zip
+#         data_files = get_data_files(config, ext)
 
-            # Open extracted file and parse it
-            with open(file_path, "r", encoding="utf8") as file:
-                log.debug("Extracting data from {}".format(file_name))
+#         for data_file in data_files:
+#             # Set the path to the data file
+#             file_name = "{}.txt".format(data_file)
+#             file_path = root_path.child(file_name)
 
-                # Opens the file as a .csv
-                csv_file = csv.reader(
-                    file, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL
-                )
+#             # Get the Django model associated with this file
+#             django_model_data = get_django_model(config, ext, data_file)
 
-                # Read each line and append it to the list
-                for line in csv_file:
-                    dpd_data[ext][data_file]["data"].append(line)
+#             # Add the file name to the extension dictionary
+#             dpd_data[ext][data_file] = {
+#                 "model": django_model_data["model"],
+#                 "origin": django_model_data["origin"],
+#                 "data": []
+#             }
 
-    # Return the completed dictionary
-    return dpd_data
+#             # Open extracted file and parse it
+#             with open(file_path, "r", encoding="utf8") as file:
+#                 log.debug("Extracting data from {}".format(file_name))
 
-def remove_files(config):
-    """Removes all the text files in the data extract directory"""
-    log.debug("Removing data extract .txt files")
+#                 # Opens the file as a .csv
+#                 csv_file = csv.reader(
+#                     file, delimiter=",", quotechar='"', quoting=csv.QUOTE_ALL
+#                 )
 
-    # Sets up location to the extracted files
-    root_path = get_root_path(config)
+#                 # Read each line and append it to the list
+#                 for line in csv_file:
+#                     dpd_data[ext][data_file]["data"].append(line)
 
-    # Collects the text files in the directory
-    text_files = root_path.listdir("*.txt")
+#     # Return the completed dictionary
+#     return dpd_data
 
-    # Removes all the text files
-    for file in text_files:
-        file.remove()
+# def remove_files(config):
+#     """Removes all the text files in the data extract directory"""
+#     log.debug("Removing data extract .txt files")
+
+#     # Sets up location to the extracted files
+#     root_path = get_root_path(config)
+
+#     # Collects the text files in the directory
+#     text_files = root_path.listdir("*.txt")
+
+#     # Removes all the text files
+#     for file in text_files:
+#         file.remove()

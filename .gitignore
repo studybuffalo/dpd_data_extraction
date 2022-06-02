@@ -1,1 +1,6 @@
+# Script reporting
 reports/*
+
+# Configuration details
+*.cfg
+!config/.dpd_data_extraction.cfg

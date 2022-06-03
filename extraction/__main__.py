@@ -28,6 +28,10 @@ import sys
 from . import Config, initiate_logging
 
 
+# Global variable for logging object; is defined during initialiation
+log = None
+
+
 def main():
     """Organizes and runs the extraction script."""
     # APPLICATION SETUP

@@ -17,34 +17,45 @@ class Log:
             self.logger = logging.getLogger(__name__)
 
     def debug(self, message):
-        """Capture a message with a level of 'debug'."""
-        self._capture_message(message, 'debug')
+        """Capture a message with a level of 'debug'.
+
+            Does not call Sentry method, as we only capture Sentry
+            messages with a level of 'warning' or gerater
+        """
+        self._logger_message(message, logging.DEBUG)
 
     def info(self, message):
-        """Capture a message with a level of 'INFO'."""
-        self._capture_message(message, 'info')
+        """Capture a message with a level of 'INFO'.
+
+            Does not call Sentry method, as we only capture Sentry
+            messages with a level of 'warning' or gerater
+        """
+        self._logger_message(message, logging.INFO)
 
     def warning(self, message):
         """Capture a message with a level of 'warning'."""
-        self._capture_message(message, 'warning')
+        self._sentry_message(message, 'warning')
+        self._logger_message(message, logging.WARNING)
 
     def error(self, message):
         """Capture a message with a level of 'error'."""
-        self._capture_message(message, 'error')
+        self._sentry_message(message, 'error')
+        self._logger_message(message, logging.ERROR)
 
     def critical(self, message):
         """Capture a message with a level of 'critical'."""
-        self._capture_message(message, 'critical')
+        self._sentry_message(message, 'critical')
+        self._logger_message(message, logging.CRITICAL)
 
-    def _capture_message(self, message, level):
-        """Logs a message based on config details"""
-        # Logs sentry messages if enabled & level is greater than "info"
-        if self.sentry and level not in ('debug', 'info'):
+    def _sentry_message(self, message, level):
+        """Logs a Sentry message (if enabled)."""
+        if self.sentry:
             sentry_sdk.capture_message(message, level)
 
-        # Logs to stdout if enabled (any level)
+    def _logger_message(self, message, level):
+        """Logs a message via the logger (if enabled)."""
         if self.stdout:
-            self.logger.log(message, level=level.upper())
+            self.logger.log(level, message)
 
 
 def initiate_logging(config):
@@ -54,7 +65,7 @@ def initiate_logging(config):
         Otherwise, all details will be logged to stdout.
     """
     # Set up Sentry (if enabled)
-    if config.sentry.enable:
+    if config.sentry.enable_sentry:
         sentry_sdk.init(
             config.sentry.dsn,
             traces_sample_rate=config.sentry.sample_rate,

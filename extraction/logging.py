@@ -1,4 +1,5 @@
 """Module for logging and error tracking."""
+import __main__
 import logging
 from sys import stdout
 

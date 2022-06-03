@@ -25,20 +25,30 @@
 import pathlib
 import sys
 
-from modules import Config, initiate_logging
+from . import Config, initiate_logging
 
-# APPLICATION SETUP
-# Setup root path
-root = pathlib.Path(sys.argv[1])
 
-# Setup config deatils
-config = Config(root)
+def main():
+    """Organizes and runs the extraction script."""
+    # APPLICATION SETUP
+    # Setup root path
+    root = pathlib.Path(sys.argv[1])
 
-# Setup Logging
-log = initiate_logging(config)
+    # Setup config deatils
+    config = Config(root)
 
-# DATA EXTRACTION PROCESS
-log.info('HEALTH CANADA DRUG PRODUCT DATABASE DATA EXTRACTION TOOL STARTED')
+    # Setup Logging
+    log = initiate_logging(config)
+
+    # DATA EXTRACTION PROCESS
+    log.info('HEALTH CANADA DRUG PRODUCT DATABASE DATA EXTRACTION TOOL STARTED')
+
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
 
 # # Download the data extracts
 # dpd_connections.download_extracts(config)

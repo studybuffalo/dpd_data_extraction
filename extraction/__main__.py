@@ -35,11 +35,11 @@ log = None
 def main():
     """Organizes and runs the extraction script."""
     # APPLICATION SETUP
-    # Setup root path
-    root = pathlib.Path(sys.argv[1])
+    # Retrieve path to config file
+    config_path = pathlib.Path(sys.argv[1])
 
     # Setup config deatils
-    config = Config(root)
+    config = Config(config_path)
 
     # Setup Logging
     log = initiate_logging(config)

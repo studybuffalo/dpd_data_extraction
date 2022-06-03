@@ -7,12 +7,14 @@ from typing import NamedTuple
 
 class Config:
     """Class to hold configuration details."""
-    def __init__(self, root_path):
+    def __init__(self, config_path):
         """Initialization details for Config class."""
         self.sentry = None
         self.api = None
         self.debug = False
-        self.root_path = root_path
+        self.config_path = Path(config_path)
+
+        self._assemble_app_configuration_details()
 
     class SentryDetails(NamedTuple):
         enable_sentry: bool
@@ -26,14 +28,13 @@ class Config:
         url: str
         token: str
 
-    def assemble_app_configuration_details(self):
+    def _assemble_app_configuration_details(self):
         """Collects and assigns all the relevant configuration details."""
         # Read the config file from the provided root
-        config_path = Path(self.root_path, 'config', 'dpd_data_extraction.cfg')
         config = configparser.ConfigParser(
             converters={'decimal': Decimal}
         )
-        config.read(config_path)
+        config.read(self.config_path)
 
         # Raise alert if no config file found
         if not config.sections():

@@ -1,6 +1,10 @@
-# Script reporting
-reports/*
-
 # Configuration details
 *.cfg
 !config/.extraction.cfg
+
+# Downloads
+downloads/*
+!downloads/.gitkeep
+
+# Script reporting
+reports/*

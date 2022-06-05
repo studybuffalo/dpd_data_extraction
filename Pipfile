@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+requests = "*"  # https://github.com/psf/requests
 sentry-sdk = "*"  # https://github.com/getsentry/sentry-python
 
 
@@ -20,8 +21,6 @@ pylint-quotes = "*"  # https://github.com/edaniszewski/pylint-quotes
 factory_boy = "*"  # https://github.com/FactoryBoy/factory_boy
 pytest = "*"  # https://github.com/pytest-dev/pytest
 pytest-cov = "*"  # https://github.com/pytest-dev/pytest-cov
-pytest-django = "*"  # https://github.com/pytest-dev/pytest-django
-pytest-pythonpath = "*"  # https://github.com/bigsassy/pytest-pythonpath
 
 
 [requires]

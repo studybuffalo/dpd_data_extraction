@@ -23,10 +23,10 @@ def _get_robot_rules(config, log):
     parser.read()
 
     # Confirm if robot is allowed to proceed
-    log.debug('Confirming robot is permitted to crawl')
+    log.info('Confirming robot is permitted to crawl')
     if parser.can_fetch(config.download.robots_user_agent, config.download.robots_crawl_location) is False:
         raise PermissionError(
-            f'Robot does not have permission to crawl URL: {config.download.robots_crawl_location}'
+            f'Robot does not have permission to crawl URL: "{config.download.robots_crawl_location}"'
         )
 
     # Determine the crawl delay (if any)
@@ -52,28 +52,60 @@ def _get_robot_rules(config, log):
 
     return max(delays)
 
-
-def _download_zips(session, delay, config, log):
-    """Downloads the zip files containing DPD data.
+def _setup_session(config, log):
+    """Sets up a Requests session to download zip files.
 
         Args:
-            session (obj): a Requests Session object.
-            delay (float): number of seconds to wait between requests.
             config (ojb): a Config object.
             log (obj): a Log object.
     """
+    log.debug('Creating Requests session.')
+
+    session = requests.Session()
+    session.headers.update({
+        'User-Agent': config.download.robots_user_agent,
+        'From': config.download.robots_from,
+    })
+
+    return session
+
+
+def _download_zips(config, log):
+    """Downloads the zip files containing DPD data.
+
+        Args:
+            config (ojb): a Config object.
+            log (obj): a Log object.
+    """
+    if config.download.download_debug:
+        log.debug('Download Debug Mode: skipping extract download.')
+
+        return
+
+    # Perform checks for robots.txt rules and get request delay
+    delay = _get_robot_rules(config, log)
+
+    # Create a Requests session
+    session = _setup_session(config, log)
+
     # Get or create a save directory
+    log.info('Downloading extract files from Health Canada Drug Product Databse.')
+
     save_path = Path(config.download.save_location)
     save_path.mkdir(exist_ok=True)
 
     for details in config.download.files:
         # Get the file from the DPD website
-        log.debug(f'Requesting file from {details["url"]}')
+        log.debug(f'Requesting file from "{details["url"]}"')
         response = session.get(details['url'])
+
+        # Confirms zip file exists at URL
+        if response.status_code == 404:
+            raise FileNotFoundError(f'Requested zip file does not exist: "{details["url"]}"')
 
         # Save the downloaded file
         with open(details['zip_save_path'], 'wb') as file:
-            log.debug(f'Saving {details["zip_save_path"]}')
+            log.debug(f'Saving "{details["zip_save_path"]}"')
             file.write(response.content)
 
         time.sleep(delay)
@@ -86,20 +118,27 @@ def _extract_csv_files(config, log):
             config (ojb): a Config object.
             log (obj): a Log object.
         """
+    if config.download.extract_debug:
+        log.debug('Extract Debug Mode: skipping zip file extraction.')
+
+        return
+
+    log.info('Extracting data files from zip files.')
+
     # Cycle through every zip file
     for details in config.download.files:
         # Open Zip file
-        log.debug(f'Opening zip file {details["zip_save_path"]}')
+        log.debug(f'Opening zip file "{details["zip_save_path"]}"')
 
         with ZipFile(details['zip_save_path']) as zip_file:
             # Rename the file witin the zip file
-            log.debug(f'Renaming {details["file_name"]} to {details["save_name"]}')
+            log.debug(f'Renaming "{details["file_name"]}" to "{details["save_name"]}"')
 
             zip_info = zip_file.getinfo(details['file_name'])
             zip_info.filename = details['save_name']
 
             # Extract the file to the save location
-            log.debug(f'Extracting {details["save_name"]} from zip file')
+            log.debug(f'Extracting "{details["save_name"]}" from zip file')
             zip_file.extract(zip_info, config.download.save_location)
 
 
@@ -109,24 +148,8 @@ def download_extracts(config, log):
             config (ojb): a Config object.
             log (obj): a Log object.
         """
-
-    if config.download.debug:
-        log.debug('Download Debug Mode: skipping extract download.')
-
-        return
-
-    # Perform checks for robots.txt rules and get request delay
-    delay = _get_robot_rules(config, log)
-
-    # Setup the session
-    session = requests.Session()
-    session.headers.update({
-        'User-Agent': config.download.robots_user_agent,
-        'From': config.download.robots_from,
-    })
-
     # Download the zip files
-    _download_zips(session, delay, config, log)
+    _download_zips(config, log)
 
     # Extract the CSV files from the zip files
     _extract_csv_files(config, log)
@@ -139,20 +162,25 @@ def remove_extracts(config, log):
             config (ojb): a Config object.
             log (obj): a Log object.
     """
+    if config.download.removal_debug:
+        log.debug('Removal Debug Mode: skipping extract file removal.')
+
+        return
+
     download_directory = Path(config.download.save_location)
 
     # Remove .zip files
-    zip_files = download_directory.glob('*.zip')
+    log.info('Removing extract zip files.')
 
-    log.debug('Removing downloaded zip files')
+    zip_files = download_directory.glob('*.zip')
 
     for file in zip_files:
         file.unlink()
 
     # Remove .txt files
-    txt_files = download_directory.glob('*.txt')
+    log.info('Removing extract .txt files.')
 
-    log.debug('Removing extracted data files')
+    txt_files = download_directory.glob('*.txt')
 
     for file in txt_files:
         file.unlink()

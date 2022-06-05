@@ -44,7 +44,9 @@ class Config:  # pylint: disable=too-few-public-methods
 
     class DownloadDetails(NamedTuple):
         """Describes HC DPD Upload API configuration details."""
-        debug: bool
+        download_debug: bool
+        extract_debug: bool
+        removal_debug: bool
         save_location: str
         files: list
         robots_txt: str
@@ -116,9 +118,19 @@ class Config:  # pylint: disable=too-few-public-methods
         """
         # Mapping of config sections & keys
         config_sections = {
-            'download_active_ingredient': [
-                'marketed', 'approved', 'inactive', 'dormant',
-            ],
+            'download_active_ingredient': ['marketed', 'approved', 'inactive', 'dormant'],
+            'download_biosimilar': ['marketed', 'approved', 'inactive', 'dormant'],
+            'download_company': ['marketed', 'approved', 'inactive', 'dormant'],
+            'download_drug_product': ['marketed', 'approved', 'inactive', 'dormant'],
+            'download_form': ['marketed', 'approved', 'inactive', 'dormant'],
+            'download_inactive_product': ['inactive'],
+            'download_packaging': ['marketed', 'approved', 'inactive', 'dormant'],
+            'download_pharmaceutical_standard': ['marketed', 'approved', 'inactive', 'dormant'],
+            'download_route': ['marketed', 'approved', 'inactive', 'dormant'],
+            'download_schedule': ['marketed', 'approved', 'inactive', 'dormant'],
+            'download_status': ['marketed', 'approved', 'inactive', 'dormant'],
+            'download_therapeutic_class': ['marketed', 'approved', 'inactive', 'dormant'],
+            'download_veterinary_species': ['marketed', 'approved', 'inactive', 'dormant'],
         }
 
         download_url = config.get('download', 'base_download_url')
@@ -137,7 +149,9 @@ class Config:  # pylint: disable=too-few-public-methods
 
         # Make the save location a Path object
         self.download = self.DownloadDetails(
-            config.getboolean('download', 'debug', fallback=True),
+            config.getboolean('download', 'download_debug', fallback=True),
+            config.getboolean('download', 'extract_debug', fallback=True),
+            config.getboolean('download', 'removal_debug', fallback=True),
             config.get('download', 'save_location'),
             file_details,
             config.get('download', 'robots_txt'),

@@ -25,11 +25,7 @@
 import pathlib
 import sys
 
-from . import Config, initiate_logging
-
-
-# Global variable for logging object; is defined during initialiation
-log = None
+from . import Config, Log, download_extracts, remove_extracts
 
 
 def main():
@@ -42,36 +38,22 @@ def main():
     config = Config(config_path)
 
     # Setup Logging
-    log = initiate_logging(config)
+    log = Log(config)
 
     # DATA EXTRACTION PROCESS
     log.info('HEALTH CANADA DRUG PRODUCT DATABASE DATA EXTRACTION TOOL STARTED')
 
+    # Download the data extracts
+    download_extracts(config, log)
+
+    # Read file content, run checksums, and submit to API (as needed)
+
+    # Remove the downloaded files
+    remove_extracts(config, log)
+
+    # Return 0 to confirm successful completion
     return 0
 
 
 if __name__ == '__main__':
     sys.exit(main())
-
-
-# # Download the data extracts
-# dpd_connections.download_extracts(config)
-
-# # Unzip the files
-# extraction.unzip_files(config)
-
-# # Extracts the data from the .txt files
-# dpd_data = extraction.extract_dpd_data(config)
-# substitution_functions.Substitutions()
-
-# # Normalize the dpd_data for saving and upload
-# normalized_data = normalize.normalize_data(dpd_data)
-
-# # Remove all the previous entries from the database
-# upload.remove_old_data()
-
-# # Upload the data to the Django database
-# upload.upload_data(config, normalized_data)
-
-# # Remove all the unzipped text files
-# extraction.remove_files(config)

@@ -25,7 +25,9 @@
 import pathlib
 import sys
 
-from . import Config, Log, download_extracts, remove_extracts
+from extraction.upload import upload_data
+
+from . import Config, Log, download_extracts, remove_extracts, upload_data
 
 
 def main():
@@ -47,6 +49,7 @@ def main():
     download_extracts(config, log)
 
     # Read file content, run checksums, and submit to API (as needed)
+    upload_data(config, log)
 
     # Remove the downloaded files
     remove_extracts(config, log)

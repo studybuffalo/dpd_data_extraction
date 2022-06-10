@@ -4,7 +4,7 @@ import time
 from urllib.robotparser import RobotFileParser
 from zipfile import ZipFile
 
-import requests
+from .utils import setup_session
 
 
 def _get_robot_rules(config, log):
@@ -52,23 +52,6 @@ def _get_robot_rules(config, log):
 
     return max(delays)
 
-def _setup_session(config, log):
-    """Sets up a Requests session to download zip files.
-
-        Args:
-            config (ojb): a Config object.
-            log (obj): a Log object.
-    """
-    log.debug('Creating Requests session.')
-
-    session = requests.Session()
-    session.headers.update({
-        'User-Agent': config.download.robots_user_agent,
-        'From': config.download.robots_from,
-    })
-
-    return session
-
 
 def _download_zips(config, log):
     """Downloads the zip files containing DPD data.
@@ -86,7 +69,7 @@ def _download_zips(config, log):
     delay = _get_robot_rules(config, log)
 
     # Create a Requests session
-    session = _setup_session(config, log)
+    session = setup_session(config, log)
 
     # Get or create a save directory
     log.info('Downloading extract files from Health Canada Drug Product Databse.')

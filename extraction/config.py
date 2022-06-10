@@ -19,10 +19,9 @@ class Config:  # pylint: disable=too-few-public-methods
                 api: A named tuple containing API config details.
         """
         self.config_path = Path(config_path)
-        self.api = None
-        self.download = None
         self.logging = None
-        self.sentry = None
+        self.download = None
+        self.upload = None
 
         self._assemble_app_configuration_details()
 
@@ -36,14 +35,8 @@ class Config:  # pylint: disable=too-few-public-methods
         enable_stdout: bool
         stdout_level: int
 
-    class APIDetails(NamedTuple):
-        """Describes HC DPD Upload API configuration details."""
-        debug: bool
-        url: str
-        token: str
-
     class DownloadDetails(NamedTuple):
-        """Describes HC DPD Upload API configuration details."""
+        """Describes HC DPD extract download configuration details."""
         download_debug: bool
         extract_debug: bool
         removal_debug: bool
@@ -54,6 +47,14 @@ class Config:  # pylint: disable=too-few-public-methods
         robots_user_agent: str
         robots_from: str
         robots_crawl_delay: float
+
+    class UploadDetails(NamedTuple):
+        """Describes HC DPD upload configuration details."""
+        debug: bool
+        api_token: str
+        api_upload_url: str
+        api_checksum_url: str
+        checksum_step: int
 
     def _assemble_app_configuration_details(self):
         """Collects and assigns all the relevant configuration details.
@@ -76,8 +77,8 @@ class Config:  # pylint: disable=too-few-public-methods
 
         # Call methods to assign various details
         self._assign_logging_details(config)
-        self._assign_api_details(config)
         self._assign_download_details(config)
+        self._assign_upload_details(config)
 
     def _assign_logging_details(self, config):
         """Assigns details for tracking & logging.
@@ -96,19 +97,6 @@ class Config:  # pylint: disable=too-few-public-methods
             config.getint('logging', 'stdout_level', fallback=10),
         )
 
-    def _assign_api_details(self, config):
-        """Assigns details for the API upload.
-
-            Args:
-                config (obj): a ConfigParser object containing
-                    configuration details for script.
-        """
-        self.api = self.APIDetails(
-            config.getboolean('api', 'debug', fallback=False),
-            config.get('api', 'url', fallback=''),
-            config.get('api', 'token', fallback=''),
-        )
-
     def _assign_download_details(self, config):
         """Assigns details for download & extraction of DPD data.
 
@@ -118,33 +106,73 @@ class Config:  # pylint: disable=too-few-public-methods
         """
         # Mapping of config sections & keys
         config_sections = {
-            'download_active_ingredient': ['marketed', 'approved', 'inactive', 'dormant'],
-            'download_biosimilar': ['marketed', 'approved', 'inactive', 'dormant'],
-            'download_company': ['marketed', 'approved', 'inactive', 'dormant'],
-            'download_drug_product': ['marketed', 'approved', 'inactive', 'dormant'],
-            'download_form': ['marketed', 'approved', 'inactive', 'dormant'],
-            'download_inactive_product': ['inactive'],
-            'download_packaging': ['marketed', 'approved', 'inactive', 'dormant'],
-            'download_pharmaceutical_standard': ['marketed', 'approved', 'inactive', 'dormant'],
-            'download_route': ['marketed', 'approved', 'inactive', 'dormant'],
-            'download_schedule': ['marketed', 'approved', 'inactive', 'dormant'],
-            'download_status': ['marketed', 'approved', 'inactive', 'dormant'],
-            'download_therapeutic_class': ['marketed', 'approved', 'inactive', 'dormant'],
-            'download_veterinary_species': ['marketed', 'approved', 'inactive', 'dormant'],
+            'download_active_ingredient': {
+                'file_types': ['marketed', 'approved', 'inactive', 'dormant'],
+                'extract_name': 'active_ingredient',
+            },
+            'download_biosimilar': {
+                'file_types': ['marketed', 'approved', 'inactive', 'dormant'],
+                'extract_name': 'biosimilar',
+            },
+            'download_company': {
+                'file_types': ['marketed', 'approved', 'inactive', 'dormant'],
+                'extract_name': 'company',
+            },
+            'download_drug_product': {
+                'file_types': ['marketed', 'approved', 'inactive', 'dormant'],
+                'extract_name': 'drug_product',
+            },
+            'download_form': {
+                'file_types': ['marketed', 'approved', 'inactive', 'dormant'],
+                'extract_name': 'form',
+            },
+            'download_inactive_product': {
+                'file_types': ['inactive'],
+                'extract_name': 'inactive_product',
+            },
+            'download_packaging': {
+                'file_types': ['marketed', 'approved', 'inactive', 'dormant'],
+                'extract_name': 'packaging',
+            },
+            'download_pharmaceutical_standard': {
+                'file_types': ['marketed', 'approved', 'inactive', 'dormant'],
+                'extract_name': 'pharmaceutical_standard',
+            },
+            'download_route': {
+                'file_types': ['marketed', 'approved', 'inactive', 'dormant'],
+                'extract_name': 'route',
+            },
+            'download_schedule': {
+                'file_types': ['marketed', 'approved', 'inactive', 'dormant'],
+                'extract_name': 'schedule',
+            },
+            'download_status': {
+                'file_types': ['marketed', 'approved', 'inactive', 'dormant'],
+                'extract_name': 'status',
+            },
+            'download_therapeutic_class': {
+                'file_types': ['marketed', 'approved', 'inactive', 'dormant'],
+                'extract_name': 'therapeutic_class',
+            },
+            'download_veterinary_species': {
+                'file_types': ['marketed', 'approved', 'inactive', 'dormant'],
+                'extract_name': 'veterinary_species',
+            },
         }
 
         download_url = config.get('download', 'base_download_url')
         zip_save_location = config.get('download', 'save_location')
         file_details = []
 
-        for section, key_list in config_sections.items():
-            for key in key_list:
-                zip_name = config.get(section, f'{key}_zip_name')
+        for section, items in config_sections.items():
+            for type in items['file_types']:
+                zip_name = config.get(section, f'{type}_zip_name')
                 file_details.append({
                     'url': f'{download_url}{zip_name}',
                     'zip_save_path': Path(zip_save_location, zip_name),
-                    'file_name': config.get(section, f'{key}_file_name'),
-                    'save_name': config.get(section, f'{key}_save_name'),
+                    'file_name': config.get(section, f'{type}_file_name'),
+                    'save_name': config.get(section, f'{type}_save_name'),
+                    'extract_name': items['extract_name'],
                 })
 
         # Make the save location a Path object
@@ -159,4 +187,19 @@ class Config:  # pylint: disable=too-few-public-methods
             config.get('download', 'robots_user_agent'),
             config.get('download', 'robots_from'),
             config.getfloat('download', 'robots_crawl_delay', fallback=5),
+        )
+
+    def _assign_upload_details(self, config):
+        """Assigns details for API upload.
+
+            Args:
+                config (obj): a ConfigParser object containing
+                    configuration details for script.
+        """
+        self.upload = self.UploadDetails(
+            config.getboolean('upload', 'debug', fallback=False),
+            config.get('upload', 'api_token', fallback=''),
+            config.get('upload', 'api_upload_url', fallback=''),
+            config.get('upload', 'api_checksum_url', fallback=''),
+            config.getint('upload', 'checksum_step', fallback=100000),
         )

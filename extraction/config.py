@@ -53,6 +53,7 @@ class Config:  # pylint: disable=too-few-public-methods
         debug: bool
         api_token: str
         api_upload_url: str
+        upload_step: int
         api_checksum_url: str
         checksum_step: int
 
@@ -200,6 +201,7 @@ class Config:  # pylint: disable=too-few-public-methods
             config.getboolean('upload', 'debug', fallback=False),
             config.get('upload', 'api_token', fallback=''),
             config.get('upload', 'api_upload_url', fallback=''),
+            config.getint('upload', 'upload_step', fallback=1000),
             config.get('upload', 'api_checksum_url', fallback=''),
             config.getint('upload', 'checksum_step', fallback=100000),
         )

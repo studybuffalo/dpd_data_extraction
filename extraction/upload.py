@@ -267,7 +267,7 @@ class UploadManager:
         # Loop through all checksums & group into batches of the step
         for file_checksum in file_checksums:
             if file_checksum['drug_code'] >= checksum_stop:
-                # Drug code out of range - reset reset variables for next group
+                # Drug code out of range - reset variables for next group
                 checksum_start = checksum_start + checksum_step
                 checksum_stop = checksum_start + checksum_step
 

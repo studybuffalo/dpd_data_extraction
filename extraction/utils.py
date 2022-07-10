@@ -2,7 +2,7 @@
 import requests
 
 
-def setup_session(config, log, extra_headers={}):
+def setup_session(config, log, extra_headers=None):
     """Sets up a Requests session to download zip files.
 
         Args:
@@ -21,4 +21,3 @@ def setup_session(config, log, extra_headers={}):
     session.headers.update(session_headers)
 
     return session
-

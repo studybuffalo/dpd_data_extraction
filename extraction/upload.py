@@ -275,48 +275,48 @@ class UploadManager:
         return checksum_groups
 
     def identify_required_uploads(self, file_checksums, extract_type):
-            """Identifies which drug codes need to be uploaded.
+        """Identifies which drug codes need to be uploaded.
 
-                Args:
-                    file_checksums (dict): the dictionary of grouped checksum values.
-                    extract_type (str): extract type for provided checksums.
+            Args:
+                file_checksums (dict): the dictionary of grouped checksum values.
+                extract_type (str): extract type for provided checksums.
 
-                Returns:
-                    list: drug_codes that will need to be uploaded.
-            """
-            # Retrieve API checksum values for comparison
-            self.log.debug(f'Retrieve comparison checksums for "{extract_type}" file type.')
+            Returns:
+                list: drug_codes that will need to be uploaded.
+        """
+        # Retrieve API checksum values for comparison
+        self.log.debug(f'Retrieve comparison checksums for "{extract_type}" file type.')
 
-            checksum_step = self.config.upload.checksum_step
-            api_checksums = self._retrieve_comparison_checksums(checksum_step, extract_type)
+        checksum_step = self.config.upload.checksum_step
+        api_checksums = self._retrieve_comparison_checksums(checksum_step, extract_type)
 
-            # Loop through grouped file checksums to identify drug codes requiring upload
-            drug_code_list = []
+        # Loop through grouped file checksums to identify drug codes requiring upload
+        drug_code_list = []
+        temp_drug_code_list = []
+
+        for drug_code_start, rows in file_checksums.items():
+            temp_checksum_list = []
             temp_drug_code_list = []
 
-            for drug_code_start, rows in file_checksums.items():
-                temp_checksum_list = []
-                temp_drug_code_list = []
+            # Iterate through items in group to calculate checksum
+            for row in rows:
+                temp_checksum_list.append(row['checksum'])
+                temp_drug_code_list.append(row['drug_code'])
 
-                # Iterate through items in group to calculate checksum
-                for row in rows:
-                    temp_checksum_list.append(row['checksum'])
-                    temp_drug_code_list.append(row['drug_code'])
+            # Calculate checksum for group
+            group_checksum = self.calculate_checksum(''.join(temp_checksum_list))
 
-                # Calculate checksum for group
-                group_checksum = self.calculate_checksum(''.join(temp_checksum_list))
+            # Run checksum comparison
+            if drug_code_start in api_checksums and group_checksum == api_checksums[drug_code_start]:
+                # Match found with API checksums - no upload required
+                self.log.debug(
+                    f'No upload required for drug code start = "{drug_code_start}" and step = "{checksum_step}")'
+                )
+            else:
+                # No checksum match found - record drug codes for upload
+                drug_code_list.extend(temp_drug_code_list)
 
-                # Run checksum comparison
-                if drug_code_start in api_checksums and group_checksum == api_checksums[drug_code_start]:
-                    # Match found with API checksums - no upload required
-                    self.log.debug(
-                        f'No upload required for drug code start = "{drug_code_start}" and step = "{checksum_step}")'
-                    )
-                else:
-                    # No checksum match found - record drug codes for upload
-                    drug_code_list.extend(temp_drug_code_list)
-
-            return drug_code_list
+        return drug_code_list
 
     def submit_upload_data(self, data, required_drug_codes, extract_type):
         """Uploads the required drug codes.
@@ -343,9 +343,9 @@ class UploadManager:
                         'post',
                         data={'data': submit_data},
                     )
-                except HTTPError as e:
+                except HTTPError as error:
                     self.log.warning(
-                        f'Error uploading {extract_type} data: {e}'
+                        f'Error uploading {extract_type} data: {error}'
                     )
 
                 # Reset upload list for next batch
@@ -396,7 +396,7 @@ class UploadManager:
         }
         return setup_session(self.config, self.log, extra_headers)
 
-    def _make_api_call(self, url, method='get', data={}):
+    def _make_api_call(self, url, method='get', data=None):
         """Makes call to API and returns response.
 
             Args:

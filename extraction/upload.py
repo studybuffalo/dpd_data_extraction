@@ -337,9 +337,7 @@ class UploadManager:
         drug_code_stop = drug_code_start + drug_code_step
 
         for drug_code in required_drug_codes:
-            print(drug_code)
             if drug_code >= drug_code_stop:
-                print("upload")
                 # Drug code out of range - submit upload
                 self._make_api_call(
                     self.config.upload.api_upload_url,

@@ -166,13 +166,13 @@ class Config:  # pylint: disable=too-few-public-methods
         file_details = []
 
         for section, items in config_sections.items():
-            for type in items['file_types']:
-                zip_name = config.get(section, f'{type}_zip_name')
+            for file_type in items['file_types']:
+                zip_name = config.get(section, f'{file_type}_zip_name')
                 file_details.append({
                     'url': f'{download_url}{zip_name}',
                     'zip_save_path': Path(zip_save_location, zip_name),
-                    'file_name': config.get(section, f'{type}_file_name'),
-                    'save_name': config.get(section, f'{type}_save_name'),
+                    'file_name': config.get(section, f'{file_type}_file_name'),
+                    'save_name': config.get(section, f'{file_type}_save_name'),
                     'extract_name': items['extract_name'],
                 })
 
